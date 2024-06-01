@@ -66,6 +66,6 @@ pub mod tests {
         let bytes: [u8; 9] = [0b10100011, 0b00000000, 0b00000001, 0b11000111, 0b10000100, 0b00000100, 0b00000000, 0b00000000, 0b00000001];
         let instructions = decode_8086(bytes[..].iter());
         assert_eq!(instructions[0].to_string(), "mov [256], ax");
-        assert_eq!(instructions[1].to_string(), "mov [si + 4], 256");
+        assert_eq!(instructions[1].to_string(), "mov [si + 4], word 256");
     }
 }

@@ -48,18 +48,19 @@ pub trait WithRMField: WithWideField {
         return (second_byte >> Self::RM_RIGHT_SHIFT_BY) & RM_MASK;
     }
 
-    fn extract_disp<'a, I>(modf: u8, rm: u8, mut byte_stream: I) -> Option<Data>
+    fn extract_disp<'a, I>(modf: u8, rm: u8, mut byte_stream: I) -> Option<u16>
     where
         I: Iterator<Item = &'a u8>,
     {
         if modf == 0b01 {
             let data = byte_stream.next().expect("extract disp-low").to_owned();
-            Some(Data::U8(data))
+            let sign_extended = ((data as i8) as i16) as u16;
+            Some(sign_extended)
         } else if modf == 0b10 || (modf == 0b00 && rm == 0b110) {
             let data_low = byte_stream.next().expect("extract disp-low").to_owned();
             let data_high = byte_stream.next().expect("extract disp-high").to_owned();
             let data: u16 = ((data_high as u16) << 8) | (data_low as u16);
-            Some(Data::U16(data))
+            Some(data)
         } else {
             None
         }
@@ -77,10 +78,7 @@ pub trait WithRMField: WithWideField {
             RM::Reg(register_from_u8(rm, wide))
         } else if modf == 0b00 && rm == 0b110 {
             RM::Mem(EffectiveAddress::DirectAddress(
-                match disp.expect("direct address 16bit displacement") {
-                    Data::U8(_) => unreachable!(),
-                    Data::U16(x) => x,
-                },
+                disp.expect("direct address 16bit displacement")
             ))
         } else {
             match rm {
@@ -143,8 +141,6 @@ pub trait WithData: WithWideField {
     }
 }
 
-pub trait WithDisp: WithRMField {}
-
 #[derive(Debug, PartialEq)]
 pub enum Data {
     U8(u8),
@@ -180,14 +176,19 @@ pub enum Register {
 #[allow(non_camel_case_types)]
 pub enum EffectiveAddress {
     DirectAddress(u16),
-    BX_SI(Option<Data>),
-    BX_DI(Option<Data>),
-    BP_SI(Option<Data>),
-    BP_DI(Option<Data>),
-    SI(Option<Data>),
-    DI(Option<Data>),
-    BP(Data),
-    BX(Option<Data>),
+    BX_SI(Option<u16>),
+    BX_DI(Option<u16>),
+    BP_SI(Option<u16>),
+    BP_DI(Option<u16>),
+    SI(Option<u16>),
+    DI(Option<u16>),
+    BP(u16),
+    BX(Option<u16>),
+}
+
+fn disp_str_repr(d: &u16) -> String {
+    let i = *d as i16;
+    format!("{}{}", if i < 0 { "" } else { "+ " }, i)
 }
 
 impl fmt::Display for EffectiveAddress {
@@ -195,32 +196,32 @@ impl fmt::Display for EffectiveAddress {
         match self {
             EffectiveAddress::DirectAddress(x) => write!(f, "[{}]", x),
             EffectiveAddress::BX_SI(x) => match x {
-                Some(y) => write!(f, "[bx + si + {}]", u16::from(y)),
+                Some(y) => write!(f, "[bx + si {}]", disp_str_repr(y)),
                 None => write!(f, "[bx + si]"),
             },
             EffectiveAddress::BX_DI(x) => match x {
-                Some(y) => write!(f, "[bx + di + {}]", u16::from(y)),
+                Some(y) => write!(f, "[bx + di {}]", disp_str_repr(y)),
                 None => write!(f, "[bx + di]"),
             },
             EffectiveAddress::BP_SI(x) => match x {
-                Some(y) => write!(f, "[bp + si + {}]", u16::from(y)),
+                Some(y) => write!(f, "[bp + si {}]", disp_str_repr(y)),
                 None => write!(f, "[bp + si]"),
             },
             EffectiveAddress::BP_DI(x) => match x {
-                Some(y) => write!(f, "[bp + di + {}]", u16::from(y)),
+                Some(y) => write!(f, "[bp + di {}]", disp_str_repr(y)),
                 None => write!(f, "[bp + di]"),
             },
             EffectiveAddress::SI(x) => match x {
-                Some(y) => write!(f, "[si + {}]", u16::from(y)),
+                Some(y) => write!(f, "[si {}]", disp_str_repr(y)),
                 None => write!(f, "[si]"),
             },
             EffectiveAddress::DI(x) => match x {
-                Some(y) => write!(f, "[di + {}]", u16::from(y)),
+                Some(y) => write!(f, "[di {}]", disp_str_repr(y)),
                 None => write!(f, "[di]"),
             },
-            EffectiveAddress::BP(x) => write!(f, "[bp + {}]", u16::from(x)),
+            EffectiveAddress::BP(x) => write!(f, "[bp {}]", disp_str_repr(x)),
             EffectiveAddress::BX(x) => match x {
-                Some(y) => write!(f, "[bx + {}]", u16::from(y)),
+                Some(y) => write!(f, "[bx {}]", disp_str_repr(y)),
                 None => write!(f, "[bx]"),
             },
         }

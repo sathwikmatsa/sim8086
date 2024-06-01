@@ -129,7 +129,7 @@ mod tests {
         assert_eq!(
             ImmediateToRegisterMemory::new(bytes[0], &mut bytes[1..].into_iter()),
             ImmediateToRegisterMemory {
-                rm: RM::Mem(crate::instruction::EffectiveAddress::BP(Data::U8(4))),
+                rm: RM::Mem(crate::instruction::EffectiveAddress::BP(4)),
                 data: Data::U8(0)
             }
         )
@@ -143,7 +143,7 @@ mod tests {
         assert_eq!(
             ImmediateToRegisterMemory::new(bytes[0], &mut bytes[1..].into_iter()),
             ImmediateToRegisterMemory {
-                rm: RM::Mem(crate::instruction::EffectiveAddress::SI(Some(Data::U16(4)))),
+                rm: RM::Mem(crate::instruction::EffectiveAddress::SI(Some(4))),
                 data: Data::U16(256)
             }
         )

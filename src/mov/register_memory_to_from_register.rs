@@ -73,8 +73,6 @@ impl Instruction for RegisterMemoryToFromRegister {
 
 #[cfg(test)]
 mod tests {
-    use crate::instruction::Data;
-
     use super::*;
 
     #[test]
@@ -142,7 +140,7 @@ mod tests {
             RegisterMemoryToFromRegister::new(bytes[0], &mut bytes[1..].into_iter()),
             RegisterMemoryToFromRegister {
                 reg: Register::CL,
-                rm: RM::Mem(crate::instruction::EffectiveAddress::BP(Data::U8(2))),
+                rm: RM::Mem(crate::instruction::EffectiveAddress::BP(2)),
                 is_reg_dest: false
             }
         )
@@ -155,9 +153,7 @@ mod tests {
             RegisterMemoryToFromRegister::new(bytes[0], &mut bytes[1..].into_iter()),
             RegisterMemoryToFromRegister {
                 reg: Register::BX,
-                rm: RM::Mem(crate::instruction::EffectiveAddress::BX_SI(Some(
-                    Data::U16(256)
-                ))),
+                rm: RM::Mem(crate::instruction::EffectiveAddress::BX_SI(Some(256))),
                 is_reg_dest: false
             }
         )
@@ -170,9 +166,7 @@ mod tests {
             RegisterMemoryToFromRegister::new(bytes[0], &mut bytes[1..].into_iter()),
             RegisterMemoryToFromRegister {
                 reg: Register::BX,
-                rm: RM::Mem(crate::instruction::EffectiveAddress::BX_SI(Some(
-                    Data::U16(256)
-                ))),
+                rm: RM::Mem(crate::instruction::EffectiveAddress::BX_SI(Some(256))),
                 is_reg_dest: true
             }
         )
