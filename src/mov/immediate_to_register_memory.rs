@@ -10,7 +10,15 @@ pub struct ImmediateToRegisterMemory {
 
 impl fmt::Display for ImmediateToRegisterMemory {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "mov {}, {}", self.rm, self.data)
+        match self.rm {
+            RM::Mem(_) => {
+                match self.data {
+                    Data::U8(x) => write!(f, "mov {}, byte {}", self.rm, x),
+                    Data::U16(x) => write!(f, "mov {}, word {}", self.rm, x)
+                }
+            },
+            RM::Reg(_) => write!(f, "mov {}, {}", self.rm, self.data)
+        }
     }
 }
 
