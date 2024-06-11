@@ -14,7 +14,7 @@ fn main() {
     let mut bytes = Vec::new();
     file.read_to_end(&mut bytes).expect("read file");
 
-    let instructions = decode_8086(bytes.iter());
+    let instructions = decode_8086(&mut bytes.iter());
 
     let out_filepath = format!("{}.8086.decoded", file_path);
     let mut out_file = File::create(out_filepath).expect("Open output file");

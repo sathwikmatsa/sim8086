@@ -1,1 +1,4 @@
 /target
+/tests/artifacts/*
+!/tests/artifacts/*.asm
+/tests/artifacts/*.sim8086.asm
