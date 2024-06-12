@@ -1,4 +1,4 @@
-use crate::fields::{Data, EffectiveAddress, Register, RM};
+use crate::fields::{Data, EffectiveAddress, Inc, Register, RM};
 
 pub trait WithSignField {
     const SIGN_MASK_MATCH: u8 = 0b00000010;
@@ -153,5 +153,15 @@ pub trait WithDataS: WithWideField + WithSignField {
             let sign_extended = ((data as i8) as i16) as u16;
             Data::U16(sign_extended)
         }
+    }
+}
+
+pub trait WithInc8 {
+    fn extract_inc8<'a, I>(_first_byte: u8, byte_stream: &mut I) -> Inc
+    where
+        I: Iterator<Item = &'a u8>,
+    {
+        let data = byte_stream.next().expect("extract inc-8").to_owned();
+        Inc::I8(data as i8)
     }
 }

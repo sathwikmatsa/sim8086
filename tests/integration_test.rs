@@ -51,3 +51,8 @@ fn challenge_movs() {
 fn add_sub_cmp() {
     test_fixture("listing_41_half");
 }
+
+#[test]
+fn jumps() {
+    test_fixture("listing_41_otherhalf");
+}

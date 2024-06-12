@@ -15,7 +15,7 @@ macro_rules! create_instruction_decoder {
             ($operation:ident, $operand_type:ty, $opcode:expr, $mask:expr)
         ),*
     ) => {
-        fn decode_instruction(first: u8, second: Option<u8>) -> Result<(Operation, Box<dyn InstructionDecoder>), ()> {
+        fn decode_instruction(first: u8, second: Option<u8>) -> Result<(Operation, Box<dyn InstructionDecoder>), String> {
             $(
                 if $opcode.len() == 1 && $mask.len() == 1 {
                     if (first & $mask[0]) == $opcode[0] {
@@ -32,7 +32,7 @@ macro_rules! create_instruction_decoder {
                     }
                 }
             )*
-            Err(())
+            Err(format!("Unknown opcode: {:08b} {:08b}", first, second.unwrap_or(0)))
         }
     }
 }
@@ -66,7 +66,27 @@ create_instruction_decoder!(
         [0b10000000, 0b00111000],
         [0b11111100, 0b00111000]
     ),
-    (Cmp, AccImd, [0b00111100], [0b11111110])
+    (Cmp, AccImd, [0b00111100], [0b11111110]),
+    (JE, Inc8, [0b01110100], [0b11111111]),
+    (JL, Inc8, [0b01111100], [0b11111111]),
+    (JLE, Inc8, [0b01111110], [0b11111111]),
+    (JB, Inc8, [0b01110010], [0b11111111]),
+    (JBE, Inc8, [0b01110110], [0b11111111]),
+    (JP, Inc8, [0b01111010], [0b11111111]),
+    (JO, Inc8, [0b01110000], [0b11111111]),
+    (JS, Inc8, [0b01111000], [0b11111111]),
+    (JNE, Inc8, [0b01110101], [0b11111111]),
+    (JNL, Inc8, [0b01111101], [0b11111111]),
+    (JNLE, Inc8, [0b01111111], [0b11111111]),
+    (JNB, Inc8, [0b01110011], [0b11111111]),
+    (JNBE, Inc8, [0b01110111], [0b11111111]),
+    (JNP, Inc8, [0b01111011], [0b11111111]),
+    (JNO, Inc8, [0b01110001], [0b11111111]),
+    (JNS, Inc8, [0b01111001], [0b11111111]),
+    (LOOP, Inc8, [0b11100010], [0b11111111]),
+    (LOOPZ, Inc8, [0b11100001], [0b11111111]),
+    (LOOPNZ, Inc8, [0b11100000], [0b11111111]),
+    (JCXZ, Inc8, [0b11100011], [0b11111111])
 );
 
 pub fn decode_8086(byte_stream: &[u8]) -> Vec<Inst> {
@@ -75,7 +95,7 @@ pub fn decode_8086(byte_stream: &[u8]) -> Vec<Inst> {
     let mut first_instruction_byte = byte_stream.next();
     while let Some(&first_byte) = first_instruction_byte {
         let second_byte = byte_stream.peek().map(|&v| *v);
-        let (op, decoder) = decode_instruction(first_byte, second_byte).expect("Opcode handled");
+        let (op, decoder) = decode_instruction(first_byte, second_byte).unwrap();
         instructions.push(decoder.decode(first_byte, &mut byte_stream, op));
         first_instruction_byte = byte_stream.next();
     }

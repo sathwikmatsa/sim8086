@@ -2,19 +2,41 @@ use std::fmt::{self, Display};
 
 use enum_stringify::EnumStringify;
 
-use super::{Data, EffectiveAddress, Register};
+use super::{Data, EffectiveAddress, Inc, Register};
 
 #[derive(EnumStringify, Debug, PartialEq, Clone, Copy)]
 #[enum_stringify(case = "lower")]
+#[allow(clippy::upper_case_acronyms)]
 pub enum Operation {
     Mov,
     Add,
     Sub,
-    Cmp
+    Cmp,
+    JE,
+    JL,
+    JLE,
+    JB,
+    JBE,
+    JP,
+    JO,
+    JS,
+    JNE,
+    JNL,
+    JNLE,
+    JNB,
+    JNBE,
+    JNP,
+    JNO,
+    JNS,
+    LOOP,
+    LOOPZ,
+    LOOPNZ,
+    JCXZ,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Operand {
+    Increment(Inc),
     Immediate(Data),
     Register(Register),
     EffectiveAddress(EffectiveAddress),
@@ -26,6 +48,7 @@ impl Display for Operand {
             Self::EffectiveAddress(x) => write!(f, "{}", x),
             Self::Register(x) => write!(f, "{}", x),
             Self::Immediate(x) => write!(f, "{}", x),
+            Self::Increment(x) => write!(f, "{}", x),
         }
     }
 }
