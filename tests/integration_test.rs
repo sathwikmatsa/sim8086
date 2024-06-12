@@ -20,7 +20,7 @@ fn decode(file_path: &str) {
     let mut bytes = Vec::new();
     file.read_to_end(&mut bytes).expect("read file");
 
-    let instructions = decode_8086(&mut bytes.iter());
+    let instructions = decode_8086(&bytes[..]);
 
     let out_filepath = format!("{}.sim8086.asm", file_path);
     let mut out_file = File::create(out_filepath).expect("Open output file");
@@ -38,11 +38,16 @@ fn test_fixture(name: &str) {
 }
 
 #[test]
-fn listing_39() {
+fn more_movs() {
     test_fixture("listing_39");
 }
 
 #[test]
-fn listing_40() {
+fn challenge_movs() {
     test_fixture("listing_40");
+}
+
+#[test]
+fn add_sub_cmp() {
+    test_fixture("listing_41_half");
 }

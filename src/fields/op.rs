@@ -8,6 +8,9 @@ use super::{Data, EffectiveAddress, Register};
 #[enum_stringify(case = "lower")]
 pub enum Operation {
     Mov,
+    Add,
+    Sub,
+    Cmp
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]

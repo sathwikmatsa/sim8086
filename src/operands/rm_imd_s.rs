@@ -1,21 +1,23 @@
 use crate::{
-    extractors::{WithData, WithRMField, WithWideField},
+    extractors::{WithDataS, WithRMField, WithSignField, WithWideField},
     fields::Operation,
     instruction::{Inst, InstructionDecoder},
 };
 
 #[derive(Default)]
-pub struct RMImd;
+pub struct RMImdS;
 
-impl WithRMField for RMImd {}
+impl WithRMField for RMImdS {}
 
-impl WithData for RMImd {}
+impl WithSignField for RMImdS {}
 
-impl WithWideField for RMImd {
+impl WithDataS for RMImdS {}
+
+impl WithWideField for RMImdS {
     const WIDE_MASK_MATCH: u8 = 0b00000001;
 }
 
-impl InstructionDecoder for RMImd {
+impl InstructionDecoder for RMImdS {
     fn decode(
         &self,
         first_byte: u8,
@@ -41,7 +43,7 @@ mod tests {
     use super::*;
     use crate::fields::{Data, EffectiveAddress, Operand, Register};
 
-    const DECODER: RMImd = RMImd;
+    const DECODER: RMImdS = RMImdS;
 
     #[test]
     fn immediate_to_register_wide() {

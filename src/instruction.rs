@@ -1,4 +1,5 @@
 use std::fmt::{self, Display};
+use std::iter::Peekable;
 use std::slice::Iter;
 
 use crate::fields::{Data, Operand, Operation};
@@ -40,5 +41,5 @@ impl Display for Inst {
 }
 
 pub trait InstructionDecoder {
-    fn decode(&self, first_byte: u8, byte_stream: &mut Iter<u8>, op: Operation) -> Inst;
+    fn decode(&self, first_byte: u8, byte_stream: &mut Peekable<Iter<u8>>, op: Operation) -> Inst;
 }

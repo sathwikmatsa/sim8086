@@ -1,5 +1,13 @@
 use crate::fields::{Data, EffectiveAddress, Register, RM};
 
+pub trait WithSignField {
+    const SIGN_MASK_MATCH: u8 = 0b00000010;
+
+    fn sign_extend(first_byte: u8) -> bool {
+        (first_byte & Self::SIGN_MASK_MATCH) == Self::SIGN_MASK_MATCH
+    }
+}
+
 pub trait WithWideField {
     const WIDE_MASK_MATCH: u8;
 
@@ -119,6 +127,31 @@ pub trait WithData: WithWideField {
         } else {
             let data = byte_stream.next().expect("extract data-8").to_owned();
             Data::U8(data)
+        }
+    }
+}
+
+pub trait WithDataS: WithWideField + WithSignField {
+    fn extract_data<'a, I>(first_byte: u8, byte_stream: &mut I) -> Data
+    where
+        I: Iterator<Item = &'a u8>,
+    {
+        let wide = Self::is_wide(first_byte);
+        let sign = Self::sign_extend(first_byte);
+        if !sign {
+            if wide {
+                let data_low = byte_stream.next().expect("extract data-low").to_owned();
+                let data_high = byte_stream.next().expect("extract data-high").to_owned();
+                let data: u16 = ((data_high as u16) << 8) | (data_low as u16);
+                Data::U16(data)
+            } else {
+                let data = byte_stream.next().expect("extract data-8").to_owned();
+                Data::U8(data)
+            }
+        } else {
+            let data = byte_stream.next().expect("extract data").to_owned();
+            let sign_extended = ((data as i8) as i16) as u16;
+            Data::U16(sign_extended)
         }
     }
 }

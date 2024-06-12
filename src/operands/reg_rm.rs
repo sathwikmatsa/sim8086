@@ -25,7 +25,7 @@ impl InstructionDecoder for RegRM {
     fn decode(
         &self,
         first_byte: u8,
-        byte_stream: &mut std::slice::Iter<u8>,
+        byte_stream: &mut std::iter::Peekable<std::slice::Iter<'_, u8>>,
         op: Operation,
     ) -> Inst {
         let second_byte = byte_stream
@@ -55,7 +55,7 @@ mod tests {
     fn reg_to_reg_wide() {
         let bytes: [u8; 2] = [0b10001001, 0b11000011];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter(), Operation::Mov),
+            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 second: Some(Operand::Register(Register::AX)),
                 first: Some(Operand::Register(Register::BX)),
@@ -68,7 +68,7 @@ mod tests {
     fn reg_to_reg_not_wide() {
         let bytes: [u8; 2] = [0b10001000, 0b11000011];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter(), Operation::Mov),
+            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 second: Some(Operand::Register(Register::AL)),
                 first: Some(Operand::Register(Register::BL)),
@@ -81,7 +81,7 @@ mod tests {
     fn reg_to_mem_no_disp() {
         let bytes: [u8; 2] = [0b10001000, 0b00010011];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter(), Operation::Mov),
+            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 second: Some(Operand::Register(Register::DL)),
                 first: Some(Operand::EffectiveAddress(EffectiveAddress::BP_DI(None))),
@@ -94,7 +94,7 @@ mod tests {
     fn reg_to_mem_direct_address() {
         let bytes: [u8; 4] = [0b10001001, 0b00010110, 0b00000001, 0b00000000];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter(), Operation::Mov),
+            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 second: Some(Operand::Register(Register::DX)),
                 first: Some(Operand::EffectiveAddress(EffectiveAddress::DirectAddress(
@@ -109,7 +109,7 @@ mod tests {
     fn reg_to_mem_8bit_disp() {
         let bytes: [u8; 3] = [0b10001000, 0b01001110, 0b00000010];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter(), Operation::Mov),
+            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 second: Some(Operand::Register(Register::CL)),
                 first: Some(Operand::EffectiveAddress(EffectiveAddress::BP(2))),
@@ -122,7 +122,7 @@ mod tests {
     fn reg_to_mem_16bit_disp() {
         let bytes: [u8; 4] = [0b10001001, 0b10011000, 0b00000000, 0b00000001];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter(), Operation::Mov),
+            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 second: Some(Operand::Register(Register::BX)),
                 first: Some(Operand::EffectiveAddress(EffectiveAddress::BX_SI(Some(
@@ -137,7 +137,7 @@ mod tests {
     fn mem_16bit_disp_to_reg() {
         let bytes: [u8; 4] = [0b10001011, 0b10011000, 0b00000000, 0b00000001];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter(), Operation::Mov),
+            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 first: Some(Operand::Register(Register::BX)),
                 second: Some(Operand::EffectiveAddress(EffectiveAddress::BX_SI(Some(

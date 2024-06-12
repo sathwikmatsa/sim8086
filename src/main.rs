@@ -1,5 +1,5 @@
-use std::{env, fs::File, io::Read};
 use sim8086::{decode_8086, write_8086};
+use std::{env, fs::File, io::Read};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -14,7 +14,7 @@ fn main() {
     let mut bytes = Vec::new();
     file.read_to_end(&mut bytes).expect("read file");
 
-    let instructions = decode_8086(&mut bytes.iter());
+    let instructions = decode_8086(&bytes[..]);
 
     let out_filepath = format!("{}.8086.decoded", file_path);
     let mut out_file = File::create(out_filepath).expect("Open output file");

@@ -17,7 +17,7 @@ impl InstructionDecoder for AccDA {
     fn decode(
         &self,
         first_byte: u8,
-        byte_stream: &mut std::slice::Iter<u8>,
+        byte_stream: &mut std::iter::Peekable<std::slice::Iter<'_, u8>>,
         op: Operation,
     ) -> Inst {
         let wide = Self::is_wide(first_byte);
@@ -48,7 +48,7 @@ mod tests {
     fn not_wide() {
         let bytes: [u8; 2] = [0b10100000, 0b00000001];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter(), Operation::Mov),
+            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 operation: Operation::Mov,
                 first: Some(Operand::Register(Register::AL)),
@@ -63,7 +63,7 @@ mod tests {
     fn wide() {
         let bytes: [u8; 3] = [0b10100001, 0b00000000, 0b00000001];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter(), Operation::Mov),
+            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 operation: Operation::Mov,
                 first: Some(Operand::Register(Register::AX)),
