@@ -104,7 +104,11 @@ create_instruction_decoder!(
     (XLAT, NoOps, [0b11010111], [0b11111111]),
     (LEA, RegRMW, [0b10001101], [0b11111111]),
     (LDS, RegRMW, [0b11000101], [0b11111111]),
-    (LES, RegRMW, [0b11000100], [0b11111111])
+    (LES, RegRMW, [0b11000100], [0b11111111]),
+    (LAHF, NoOps, [0b10011111], [0b11111111]),
+    (SAHF, NoOps, [0b10011110], [0b11111111]),
+    (PUSHF, NoOps, [0b10011100], [0b11111111]),
+    (POPF, NoOps, [0b10011101], [0b11111111])
 );
 
 pub fn decode_8086(byte_stream: &[u8]) -> Vec<Inst> {

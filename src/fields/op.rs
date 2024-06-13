@@ -41,6 +41,10 @@ pub enum Operation {
     LEA,
     LDS,
     LES,
+    LAHF,
+    SAHF,
+    PUSHF,
+    POPF,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
