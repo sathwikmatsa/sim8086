@@ -96,7 +96,11 @@ create_instruction_decoder!(
     (Pop, Reg, [0b01011000], [0b11111000]),
     (Pop, SR, [0b00000111], [0b11100111]),
     (XCHG, RegRM, [0b10000110], [0b11111110]),
-    (XCHG, AccReg, [0b10010000], [0b11111000])
+    (XCHG, AccReg, [0b10010000], [0b11111000]),
+    (IN, FixedPort, [0b11100100], [0b11111110]),
+    (IN, VariablePort, [0b11101100], [0b11111110]),
+    (OUT, FixedPort, [0b11100110], [0b11111110]),
+    (OUT, VariablePort, [0b11101110], [0b11111110])
 );
 
 pub fn decode_8086(byte_stream: &[u8]) -> Vec<Inst> {
