@@ -8,7 +8,7 @@ use crate::{
 pub struct Reg;
 
 impl WithRegField for Reg {
-    const RIGHT_SHIFT_BY: u8 = 3;
+    const RIGHT_SHIFT_BY: u8 = 0;
 }
 
 impl WithWideField for Reg {

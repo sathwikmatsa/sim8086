@@ -45,6 +45,10 @@ pub enum Operation {
     SAHF,
     PUSHF,
     POPF,
+    ADC,
+    INC,
+    AAA,
+    DAA,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
