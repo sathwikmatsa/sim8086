@@ -56,3 +56,8 @@ fn add_sub_cmp() {
 fn jumps() {
     test_fixture("listing_41_otherhalf");
 }
+
+#[test]
+fn completionist() {
+    test_fixture("listing_42");
+}

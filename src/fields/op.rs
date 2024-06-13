@@ -2,7 +2,7 @@ use std::fmt::{self, Display};
 
 use enum_stringify::EnumStringify;
 
-use super::{Data, EffectiveAddress, Inc, Register};
+use super::{Data, EffectiveAddress, Inc, Register, SegmentRegister};
 
 #[derive(EnumStringify, Debug, PartialEq, Clone, Copy)]
 #[enum_stringify(case = "lower")]
@@ -40,6 +40,7 @@ pub enum Operand {
     Immediate(Data),
     Register(Register),
     EffectiveAddress(EffectiveAddress),
+    SR(SegmentRegister),
 }
 
 impl Display for Operand {
@@ -49,6 +50,7 @@ impl Display for Operand {
             Self::Register(x) => write!(f, "{}", x),
             Self::Immediate(x) => write!(f, "{}", x),
             Self::Increment(x) => write!(f, "{}", x),
+            Self::SR(x) => write!(f, "{}", x),
         }
     }
 }

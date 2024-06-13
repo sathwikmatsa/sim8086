@@ -43,6 +43,8 @@ create_instruction_decoder!(
     (Mov, RegImd, [0b10110000], [0b11110000]),
     (Mov, AccDA, [0b10100000], [0b11111110]),
     (Mov, DAAcc, [0b10100010], [0b11111110]),
+    (Mov, SRRM, [0b10001110], [0b11111111]),
+    (Mov, SRRM, [0b10001100], [0b11111111]),
     (Add, RegRM, [0b00000000], [0b11111100]),
     (
         Add,

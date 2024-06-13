@@ -1,4 +1,6 @@
-use crate::fields::{Data, EffectiveAddress, Inc, Register, RM};
+use crate::fields::{
+    register_from_u8, sr_from_u8, Data, EffectiveAddress, Inc, Register, SegmentRegister, RM,
+};
 
 pub trait WithSignField {
     const SIGN_MASK_MATCH: u8 = 0b00000010;
@@ -16,7 +18,7 @@ pub trait WithWideField {
     }
 }
 
-pub trait WithDestField: WithRegField {
+pub trait WithDestField {
     const DEST_MASK_MATCH: u8;
 
     fn is_dest_in_reg_field(first_byte: u8) -> bool {
@@ -86,21 +88,6 @@ pub trait WithRMField: WithWideField {
     }
 }
 
-#[rustfmt::skip]
-fn register_from_u8(reg: u8, wide: bool) -> Register {
-    match reg {
-        0b000 => if wide { Register::AX } else { Register::AL },
-        0b001 => if wide { Register::CX } else { Register::CL },
-        0b010 => if wide { Register::DX } else { Register::DL },
-        0b011 => if wide { Register::BX } else { Register::BL },
-        0b100 => if wide { Register::SP } else { Register::AH },
-        0b101 => if wide { Register::BP } else { Register::CH },
-        0b110 => if wide { Register::SI } else { Register::DH },
-        0b111 => if wide { Register::DI } else { Register::BH },
-        _ => unreachable!()
-    }
-}
-
 pub trait WithRegField: WithWideField {
     const RIGHT_SHIFT_BY: u8;
 
@@ -163,5 +150,13 @@ pub trait WithInc8 {
     {
         let data = byte_stream.next().expect("extract inc-8").to_owned();
         Inc::I8(data as i8)
+    }
+}
+
+pub trait WithSR {
+    const SR_RIGHT_SHIFT_BY: u8;
+
+    fn extract_sr(sr_byte: u8) -> SegmentRegister {
+        sr_from_u8((sr_byte >> Self::SR_RIGHT_SHIFT_BY) & 0b00000011)
     }
 }
