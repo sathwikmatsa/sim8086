@@ -94,7 +94,9 @@ create_instruction_decoder!(
     (Push, SR, [0b00000110], [0b11100111]),
     (Pop, RM, [0b10001111, 0b00000000], [0b11111111, 0b00111000]),
     (Pop, Reg, [0b01011000], [0b11111000]),
-    (Pop, SR, [0b00000111], [0b11100111])
+    (Pop, SR, [0b00000111], [0b11100111]),
+    (XCHG, RegRM, [0b10000110], [0b11111110]),
+    (XCHG, AccReg, [0b10010000], [0b11111000])
 );
 
 pub fn decode_8086(byte_stream: &[u8]) -> Vec<Inst> {

@@ -1,5 +1,6 @@
 mod acc_da;
 mod acc_imd;
+mod acc_reg;
 mod da_acc;
 mod inc8;
 mod reg;
@@ -13,6 +14,7 @@ mod sr_rm;
 
 pub use acc_da::*;
 pub use acc_imd::*;
+pub use acc_reg::*;
 pub use da_acc::*;
 pub use inc8::*;
 pub use reg::*;

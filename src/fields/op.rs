@@ -34,6 +34,7 @@ pub enum Operation {
     JCXZ,
     Push,
     Pop,
+    XCHG,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
