@@ -23,8 +23,16 @@ impl InstructionDecoder for FixedPort {
         let data8 = Data::U8(byte_stream.next().expect("extract second byte").to_owned()).into();
         Inst {
             operation: op,
-            first: Some(acc),
-            second: Some(data8),
+            first: if op == Operation::IN {
+                Some(acc)
+            } else {
+                Some(data8)
+            },
+            second: if op == Operation::IN {
+                Some(data8)
+            } else {
+                Some(acc)
+            },
         }
     }
 }

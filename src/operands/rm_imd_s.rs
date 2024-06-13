@@ -41,7 +41,7 @@ impl InstructionDecoder for RMImdS {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::fields::{Data, EffectiveAddress, Operand, Register};
+    use crate::fields::{Data, EffectiveAddress, Operand, Register, Wide};
 
     const DECODER: RMImdS = RMImdS;
 
@@ -78,7 +78,10 @@ mod tests {
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 operation: Operation::Mov,
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::BP_DI(None))),
+                first: Some(Operand::EffectiveAddress(EffectiveAddress::BP_DI(
+                    None,
+                    Wide::Byte
+                ))),
                 second: Some(Operand::Immediate(Data::U8(5)))
             }
         )
@@ -94,8 +97,9 @@ mod tests {
             Inst {
                 operation: Operation::Mov,
                 first: Some(Operand::EffectiveAddress(EffectiveAddress::DirectAddress(
-                    4
-                ))),
+                    4,
+                    Wide::Word
+                ),)),
                 second: Some(Operand::Immediate(Data::U16(256)))
             }
         )
@@ -108,7 +112,10 @@ mod tests {
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 operation: Operation::Mov,
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::BP(4))),
+                first: Some(Operand::EffectiveAddress(EffectiveAddress::BP(
+                    4,
+                    Wide::Byte
+                ))),
                 second: Some(Operand::Immediate(Data::U8(0)))
             }
         )
@@ -123,7 +130,10 @@ mod tests {
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 operation: Operation::Mov,
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::SI(Some(4)))),
+                first: Some(Operand::EffectiveAddress(EffectiveAddress::SI(
+                    Some(4),
+                    Wide::Word
+                ))),
                 second: Some(Operand::Immediate(Data::U16(256)))
             }
         )

@@ -21,12 +21,16 @@ impl InstructionDecoder for AccDA {
         op: Operation,
     ) -> Inst {
         let wide = Self::is_wide(first_byte);
+        let ws = Self::get_wide_size(first_byte);
         let data = Self::extract_data(first_byte, byte_stream);
         let acc = if wide { Register::AX } else { Register::AL }.into();
-        let direct_address = EffectiveAddress::DirectAddress(match data {
-            Data::U16(x) => x,
-            Data::U8(x) => x.into(),
-        })
+        let direct_address = EffectiveAddress::DirectAddress(
+            match data {
+                Data::U16(x) => x,
+                Data::U8(x) => x.into(),
+            },
+            ws,
+        )
         .into();
         Inst {
             operation: op,
@@ -38,7 +42,7 @@ impl InstructionDecoder for AccDA {
 
 #[cfg(test)]
 mod tests {
-    use crate::fields::Operand;
+    use crate::fields::{Operand, Wide};
 
     use super::*;
 
@@ -53,8 +57,9 @@ mod tests {
                 operation: Operation::Mov,
                 first: Some(Operand::Register(Register::AL)),
                 second: Some(Operand::EffectiveAddress(EffectiveAddress::DirectAddress(
-                    1
-                )))
+                    1,
+                    Wide::Byte
+                ),))
             }
         );
     }
@@ -68,7 +73,8 @@ mod tests {
                 operation: Operation::Mov,
                 first: Some(Operand::Register(Register::AX)),
                 second: Some(Operand::EffectiveAddress(EffectiveAddress::DirectAddress(
-                    256
+                    256,
+                    Wide::Word
                 )))
             }
         );

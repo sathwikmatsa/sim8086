@@ -20,10 +20,19 @@ impl InstructionDecoder for VariablePort {
     ) -> Inst {
         let wide = Self::is_wide(first_byte);
         let acc = if wide { Register::AX } else { Register::AL }.into();
+        let dx = Operand::Register(Register::DX);
         Inst {
             operation: op,
-            first: Some(acc),
-            second: Some(Operand::Register(Register::DX)),
+            first: if op == Operation::IN {
+                Some(acc)
+            } else {
+                Some(dx)
+            },
+            second: if op == Operation::IN {
+                Some(dx)
+            } else {
+                Some(acc)
+            },
         }
     }
 }

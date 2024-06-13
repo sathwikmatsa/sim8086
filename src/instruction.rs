@@ -2,7 +2,7 @@ use std::fmt::{self, Display};
 use std::iter::Peekable;
 use std::slice::Iter;
 
-use crate::fields::{Data, Operand, Operation};
+use crate::fields::{Operand, Operation};
 
 #[derive(Debug, PartialEq)]
 pub struct Inst {
@@ -13,20 +13,23 @@ pub struct Inst {
 
 impl Display for Inst {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // special cases
-        if let Some(Operand::EffectiveAddress(x)) = self.first {
-            if let Some(Operand::Immediate(y)) = self.second {
-                return write!(
-                    f,
-                    "{} {}, {}",
-                    self.operation,
-                    x,
-                    match y {
-                        Data::U8(b) => format!("byte {}", b),
-                        Data::U16(w) => format!("word {}", w),
-                    }
-                );
+        // special cases / workarounds / hacks
+        // Push & Pop implicitly assume 16-bit operations in 8086. But NASM is complaining, so hardcoding size
+        if [Operation::Push, Operation::Pop].contains(&self.operation) && self.second.is_none() {
+            if let Some(Operand::EffectiveAddress(x)) = self.first {
+                return write!(f, "{} word {}", self.operation, x);
             }
+        }
+        // XCHG operand order shouldn't matter during runtime. This is just to make the binary testing
+        // work
+        if self.operation == Operation::XCHG && self.second.is_some() {
+            return write!(
+                f,
+                "{} {}, {}",
+                self.operation,
+                self.second.unwrap(),
+                self.first.unwrap()
+            );
         }
 
         write!(f, "{}", self.operation)?;

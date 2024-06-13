@@ -1,5 +1,5 @@
 use crate::fields::{
-    register_from_u8, sr_from_u8, Data, EffectiveAddress, Inc, Register, SegmentRegister, RM,
+    register_from_u8, sr_from_u8, Data, EffectiveAddress, Inc, Register, SegmentRegister, Wide, RM,
 };
 
 pub trait WithSignField {
@@ -15,6 +15,14 @@ pub trait WithWideField {
 
     fn is_wide(first_byte: u8) -> bool {
         (first_byte & Self::WIDE_MASK_MATCH) == Self::WIDE_MASK_MATCH
+    }
+
+    fn get_wide_size(first_byte: u8) -> Wide {
+        if Self::WIDE_MASK_MATCH == 0 {
+            Wide::None
+        } else {
+            Self::is_wide(first_byte).into()
+        }
     }
 }
 
@@ -63,6 +71,7 @@ pub trait WithRMField: WithWideField {
         I: Iterator<Item = &'a u8>,
     {
         let wide = Self::is_wide(first_byte);
+        let ws = Self::get_wide_size(first_byte);
         let modf = Self::extract_mod(second_byte);
         let rm = Self::extract_rm_bin(second_byte);
         let disp = Self::extract_disp(modf, rm, byte_stream);
@@ -71,17 +80,18 @@ pub trait WithRMField: WithWideField {
         } else if modf == 0b00 && rm == 0b110 {
             RM::Mem(EffectiveAddress::DirectAddress(
                 disp.expect("direct address 16bit displacement"),
+                ws,
             ))
         } else {
             match rm {
-                0b000 => RM::Mem(EffectiveAddress::BX_SI(disp)),
-                0b001 => RM::Mem(EffectiveAddress::BX_DI(disp)),
-                0b010 => RM::Mem(EffectiveAddress::BP_SI(disp)),
-                0b011 => RM::Mem(EffectiveAddress::BP_DI(disp)),
-                0b100 => RM::Mem(EffectiveAddress::SI(disp)),
-                0b101 => RM::Mem(EffectiveAddress::DI(disp)),
-                0b110 => RM::Mem(EffectiveAddress::BP(disp.expect("disp"))),
-                0b111 => RM::Mem(EffectiveAddress::BX(disp)),
+                0b000 => RM::Mem(EffectiveAddress::BX_SI(disp, ws)),
+                0b001 => RM::Mem(EffectiveAddress::BX_DI(disp, ws)),
+                0b010 => RM::Mem(EffectiveAddress::BP_SI(disp, ws)),
+                0b011 => RM::Mem(EffectiveAddress::BP_DI(disp, ws)),
+                0b100 => RM::Mem(EffectiveAddress::SI(disp, ws)),
+                0b101 => RM::Mem(EffectiveAddress::DI(disp, ws)),
+                0b110 => RM::Mem(EffectiveAddress::BP(disp.expect("disp"), ws)),
+                0b111 => RM::Mem(EffectiveAddress::BX(disp, ws)),
                 _ => unreachable!(),
             }
         }

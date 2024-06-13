@@ -70,6 +70,10 @@ pub enum Operation {
     ROR,
     RCL,
     RCR,
+    AND,
+    TEST,
+    OR,
+    XOR,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]

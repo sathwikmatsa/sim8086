@@ -47,7 +47,7 @@ impl InstructionDecoder for RegRM {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::fields::{EffectiveAddress, Operand, Register};
+    use crate::fields::{EffectiveAddress, Operand, Register, Wide};
 
     const DECODER: RegRM = RegRM;
 
@@ -84,7 +84,10 @@ mod tests {
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 second: Some(Operand::Register(Register::DL)),
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::BP_DI(None))),
+                first: Some(Operand::EffectiveAddress(EffectiveAddress::BP_DI(
+                    None,
+                    Wide::Byte
+                ))),
                 operation: Operation::Mov
             }
         )
@@ -98,7 +101,8 @@ mod tests {
             Inst {
                 second: Some(Operand::Register(Register::DX)),
                 first: Some(Operand::EffectiveAddress(EffectiveAddress::DirectAddress(
-                    1
+                    1,
+                    Wide::Word
                 ))),
                 operation: Operation::Mov
             }
@@ -112,7 +116,10 @@ mod tests {
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 second: Some(Operand::Register(Register::CL)),
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::BP(2))),
+                first: Some(Operand::EffectiveAddress(EffectiveAddress::BP(
+                    2,
+                    Wide::Byte
+                ))),
                 operation: Operation::Mov
             }
         )
@@ -125,9 +132,10 @@ mod tests {
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 second: Some(Operand::Register(Register::BX)),
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::BX_SI(Some(
-                    256
-                )))),
+                first: Some(Operand::EffectiveAddress(EffectiveAddress::BX_SI(
+                    Some(256),
+                    Wide::Word
+                ))),
                 operation: Operation::Mov
             }
         )
@@ -140,9 +148,10 @@ mod tests {
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
             Inst {
                 first: Some(Operand::Register(Register::BX)),
-                second: Some(Operand::EffectiveAddress(EffectiveAddress::BX_SI(Some(
-                    256
-                )))),
+                second: Some(Operand::EffectiveAddress(EffectiveAddress::BX_SI(
+                    Some(256),
+                    Wide::Word
+                ))),
                 operation: Operation::Mov
             }
         )

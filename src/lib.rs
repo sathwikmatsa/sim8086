@@ -204,7 +204,15 @@ create_instruction_decoder!(
         RMVW,
         [0b11010000, 0b00011000],
         [0b11111100, 0b00111000]
-    )
+    ),
+    (AND, RegRM, [0b00100000], [0b11111100]),
+    (
+        AND,
+        RMImd,
+        [0b10000000, 0b00100000],
+        [0b11111110, 0b00111000]
+    ),
+    (AND, AccImd, [0b00100100], [0b11111110])
 );
 
 pub fn decode_8086(byte_stream: &[u8]) -> Vec<Inst> {
