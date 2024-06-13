@@ -56,6 +56,12 @@ pub enum Operation {
     DAS,
     MUL,
     IMUL,
+    AAM,
+    DIV,
+    IDIV,
+    AAD,
+    CBW,
+    CWD,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
