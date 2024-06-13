@@ -37,6 +37,10 @@ pub enum Operation {
     XCHG,
     IN,
     OUT,
+    XLAT,
+    LEA,
+    LDS,
+    LES,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
