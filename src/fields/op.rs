@@ -52,6 +52,10 @@ pub enum Operation {
     SBB,
     DEC,
     NEG,
+    AAS,
+    DAS,
+    MUL,
+    IMUL,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
