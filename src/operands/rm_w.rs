@@ -5,6 +5,7 @@ use crate::{
 };
 
 #[derive(Default)]
+#[allow(clippy::upper_case_acronyms)]
 pub struct RMW;
 
 impl WithRMField for RMW {}
