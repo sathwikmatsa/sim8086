@@ -160,3 +160,11 @@ pub trait WithSR {
         sr_from_u8((sr_byte >> Self::SR_RIGHT_SHIFT_BY) & 0b00000011)
     }
 }
+
+pub trait WithVField {
+    const V_MASK_MATCH: u8;
+
+    fn is_v_set(v_byte: u8) -> bool {
+        (v_byte & Self::V_MASK_MATCH) == Self::V_MASK_MATCH
+    }
+}

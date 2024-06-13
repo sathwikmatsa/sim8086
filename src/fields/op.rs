@@ -62,6 +62,14 @@ pub enum Operation {
     AAD,
     CBW,
     CWD,
+    NOT,
+    SHL,
+    SHR,
+    SAR,
+    ROL,
+    ROR,
+    RCL,
+    RCR,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
