@@ -32,6 +32,8 @@ pub enum Operation {
     LOOPZ,
     LOOPNZ,
     JCXZ,
+    Push,
+    Pop,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
