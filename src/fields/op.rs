@@ -112,6 +112,22 @@ pub enum Operation {
     RepneSCASB,
     #[enum_stringify(rename = "repne scasw")]
     RepneSCASW,
+    Call,
+    Jmp,
+    Ret,
+    INT,
+    INT3,
+    INTO,
+    IRET,
+    CLC,
+    CMC,
+    STC,
+    CLD,
+    STD,
+    CLI,
+    STI,
+    HLT,
+    WAIT,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]

@@ -178,3 +178,37 @@ pub trait WithVField {
         (v_byte & Self::V_MASK_MATCH) == Self::V_MASK_MATCH
     }
 }
+
+pub trait WithInc16 {
+    fn extract_inc16<'a, I>(byte_stream: &mut I) -> Inc
+    where
+        I: Iterator<Item = &'a u8>,
+    {
+        let inc_low = byte_stream.next().expect("extract inc-low").to_owned();
+        let inc_high = byte_stream.next().expect("extract inc-high").to_owned();
+        let inc: i16 = ((inc_high as i16) << 8) | (inc_low as i16);
+        Inc::I16(inc)
+    }
+}
+
+pub trait WithData16 {
+    fn extract_data16<'a, I>(byte_stream: &mut I) -> Data
+    where
+        I: Iterator<Item = &'a u8>,
+    {
+        let data_low = byte_stream.next().expect("extract data-low").to_owned();
+        let data_high = byte_stream.next().expect("extract data-high").to_owned();
+        let data: u16 = ((data_high as u16) << 8) | (data_low as u16);
+        Data::U16(data)
+    }
+}
+
+pub trait WithData8 {
+    fn extract_data8<'a, I>(byte_stream: &mut I) -> Data
+    where
+        I: Iterator<Item = &'a u8>,
+    {
+        let data = byte_stream.next().expect("extract data-8").to_owned();
+        Data::U8(data)
+    }
+}
