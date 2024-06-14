@@ -74,6 +74,44 @@ pub enum Operation {
     TEST,
     OR,
     XOR,
+    MOVSB,
+    MOVSW,
+    LODSB,
+    LODSW,
+    STOSB,
+    STOSW,
+    CMPSB,
+    CMPSW,
+    SCASB,
+    SCASW,
+    #[enum_stringify(rename = "rep movsb")]
+    RepMOVSB,
+    #[enum_stringify(rename = "rep movsw")]
+    RepMOVSW,
+    #[enum_stringify(rename = "rep lodsb")]
+    RepLODSB,
+    #[enum_stringify(rename = "rep lodsw")]
+    RepLODSW,
+    #[enum_stringify(rename = "rep stosb")]
+    RepSTOSB,
+    #[enum_stringify(rename = "rep stosw")]
+    RepSTOSW,
+    #[enum_stringify(rename = "repe cmpsb")]
+    RepeCMPSB,
+    #[enum_stringify(rename = "repe cmpsw")]
+    RepeCMPSW,
+    #[enum_stringify(rename = "repe scasb")]
+    RepeSCASB,
+    #[enum_stringify(rename = "repe scasw")]
+    RepeSCASW,
+    #[enum_stringify(rename = "repne cmpsb")]
+    RepneCMPSB,
+    #[enum_stringify(rename = "repne cmpsw")]
+    RepneCMPSW,
+    #[enum_stringify(rename = "repne scasb")]
+    RepneSCASB,
+    #[enum_stringify(rename = "repne scasw")]
+    RepneSCASW,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
