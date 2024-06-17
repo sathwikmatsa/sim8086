@@ -128,6 +128,10 @@ pub enum Operation {
     STI,
     HLT,
     WAIT,
+    Lock,
+    Rep,
+    SegmentOverride,
+    LockSegmentOverride,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]

@@ -2,13 +2,25 @@ use std::fmt::{self, Display};
 use std::iter::Peekable;
 use std::slice::Iter;
 
+use enum_stringify::EnumStringify;
+
 use crate::fields::{Operand, Operation};
+
+#[derive(Debug, Default, PartialEq, EnumStringify, Copy, Clone)]
+pub enum InstructionPrefix {
+    #[default]
+    Lock,
+    Rep,
+    SegmentOverride,
+    LockSegmentOverride,
+}
 
 #[derive(Debug, PartialEq)]
 pub struct Inst {
     pub operation: Operation,
     pub first: Option<Operand>,
     pub second: Option<Operand>,
+    pub prefix: Option<InstructionPrefix>,
 }
 
 impl Inst {
@@ -17,6 +29,7 @@ impl Inst {
             operation: op,
             first: None,
             second: None,
+            prefix: None,
         }
     }
 
@@ -25,6 +38,7 @@ impl Inst {
             operation: op,
             first: Some(first),
             second: None,
+            prefix: None,
         }
     }
 
@@ -33,12 +47,22 @@ impl Inst {
             operation: op,
             first: Some(first),
             second: Some(second),
+            prefix: None,
         }
+    }
+
+    pub fn add_instruction_prefix(&mut self, prefix: InstructionPrefix) {
+        self.prefix = Some(prefix);
     }
 }
 
 impl Display for Inst {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Handle instruction prefix
+        if let Some(prefix) = self.prefix {
+            write!(f, "{} ", prefix.to_string().to_ascii_lowercase())?;
+        }
+
         // special cases / workarounds / hacks
         // Push & Pop implicitly assume 16-bit operations in 8086. But NASM is complaining, so hardcoding size
         if [Operation::Push, Operation::Pop].contains(&self.operation) && self.second.is_none() {
@@ -71,4 +95,16 @@ impl Display for Inst {
 
 pub trait InstructionDecoder {
     fn decode(&self, first_byte: u8, byte_stream: &mut Peekable<Iter<u8>>, op: Operation) -> Inst;
+}
+
+impl InstructionDecoder for InstructionPrefix {
+    fn decode(
+        &self,
+        _first_byte: u8,
+        _byte_stream: &mut Peekable<Iter<u8>>,
+        _op: Operation,
+    ) -> Inst {
+        // this is a dirty hack to let the macro in decoder.rs compile
+        unreachable!()
+    }
 }

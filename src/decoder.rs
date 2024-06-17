@@ -1,6 +1,14 @@
+use instruction::InstructionPrefix;
+
 use crate::fields::Operation;
 use crate::operands::*;
 use crate::*;
+use std::str::FromStr;
+
+pub enum DecoderOut {
+    Inst(Operation, Box<dyn InstructionDecoder>),
+    Prefix(InstructionPrefix),
+}
 
 macro_rules! create_instruction_decoder {
     (
@@ -8,11 +16,15 @@ macro_rules! create_instruction_decoder {
             ($operation:ident, $operand_type:ty, $opcode:expr, $mask:expr)
         ),*
     ) => {
-        pub fn decode_instruction(first: u8, second: Option<u8>) -> Result<(Operation, Box<dyn InstructionDecoder>), String> {
+        pub fn decode_instruction(first: u8, second: Option<u8>) -> Result<DecoderOut, String> {
             $(
+                let is_prefix = stringify!($operand_type) == "InstructionPrefix";
                 if $opcode.len() == 1 && $mask.len() == 1 {
                     if (first & $mask[0]) == $opcode[0] {
-                        return Ok((Operation::$operation, Box::<$operand_type>::default()));
+                        if is_prefix {
+                            return Ok(DecoderOut::Prefix(InstructionPrefix::from_str(stringify!($operation)).unwrap()));
+                        }
+                        return Ok(DecoderOut::Inst(Operation::$operation, Box::<$operand_type>::default()));
                     }
                 } else if $opcode.len() == 2 && $mask.len() == 2 {
                     if let Some(second_byte) = second {
@@ -20,7 +32,10 @@ macro_rules! create_instruction_decoder {
                         #[allow(clippy::out_of_bounds_indexing)]
                         // https://github.com/rust-lang/rust/issues/90534
                         if (first & $mask[0]) == $opcode[0] && (second_byte & $mask[1]) == $opcode[1] {
-                            return Ok((Operation::$operation, Box::<$operand_type>::default()));
+                            if is_prefix {
+                                return Ok(DecoderOut::Prefix(InstructionPrefix::from_str(stringify!($operation)).unwrap()));
+                            }
+                            return Ok(DecoderOut::Inst(Operation::$operation, Box::<$operand_type>::default()));
                         }
                     }
                 }
@@ -240,90 +255,6 @@ create_instruction_decoder!(
     (CMPSW, NoOps, [0b10100111], [0b11111111]),
     (SCASB, NoOps, [0b10101110], [0b11111111]),
     (SCASW, NoOps, [0b10101111], [0b11111111]),
-    (
-        RepMOVSB,
-        NoOps2,
-        [0b11110011, 0b10100100],
-        [0b11111111, 0b11111111]
-    ),
-    (
-        RepMOVSW,
-        NoOps2,
-        [0b11110011, 0b10100101],
-        [0b11111111, 0b11111111]
-    ),
-    (
-        RepLODSB,
-        NoOps2,
-        [0b11110011, 0b10101100],
-        [0b11111111, 0b11111111]
-    ),
-    (
-        RepLODSW,
-        NoOps2,
-        [0b11110011, 0b10101101],
-        [0b11111111, 0b11111111]
-    ),
-    (
-        RepSTOSB,
-        NoOps2,
-        [0b11110011, 0b10101010],
-        [0b11111111, 0b11111111]
-    ),
-    (
-        RepSTOSW,
-        NoOps2,
-        [0b11110011, 0b10101011],
-        [0b11111111, 0b11111111]
-    ),
-    (
-        RepeCMPSB,
-        NoOps2,
-        [0b11110011, 0b10100110],
-        [0b11111111, 0b11111111]
-    ),
-    (
-        RepeCMPSW,
-        NoOps2,
-        [0b11110011, 0b10100111],
-        [0b11111111, 0b11111111]
-    ),
-    (
-        RepeSCASB,
-        NoOps2,
-        [0b11110011, 0b10101110],
-        [0b11111111, 0b11111111]
-    ),
-    (
-        RepeSCASW,
-        NoOps2,
-        [0b11110011, 0b10101111],
-        [0b11111111, 0b11111111]
-    ),
-    (
-        RepneCMPSB,
-        NoOps2,
-        [0b11110010, 0b10100110],
-        [0b11111111, 0b11111111]
-    ),
-    (
-        RepneCMPSW,
-        NoOps2,
-        [0b11110010, 0b10100111],
-        [0b11111111, 0b11111111]
-    ),
-    (
-        RepneSCASB,
-        NoOps2,
-        [0b11110010, 0b10101110],
-        [0b11111111, 0b11111111]
-    ),
-    (
-        RepneSCASW,
-        NoOps2,
-        [0b11110010, 0b10101111],
-        [0b11111111, 0b11111111]
-    ),
     (Call, Inc16, [0b11101000], [0b11111111]),
     (Call, RM, [0b11111111, 0b00010000], [0b11111111, 0b00111000]),
     (Call, RM, [0b11111111, 0b00011000], [0b11111111, 0b00111000]),
@@ -347,5 +278,6 @@ create_instruction_decoder!(
     (CLI, NoOps, [0b11111010], [0b11111111]),
     (STI, NoOps, [0b11111011], [0b11111111]),
     (HLT, NoOps, [0b11110100], [0b11111111]),
-    (WAIT, NoOps, [0b10011011], [0b11111111])
+    (WAIT, NoOps, [0b10011011], [0b11111111]),
+    (Rep, InstructionPrefix, [0b11110010], [0b11111110])
 );
