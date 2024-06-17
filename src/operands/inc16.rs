@@ -17,11 +17,7 @@ impl InstructionDecoder for Inc16 {
         op: Operation,
     ) -> Inst {
         let inc16 = Self::extract_inc16(byte_stream).into();
-        Inst {
-            operation: op,
-            first: Some(inc16),
-            second: None,
-        }
+        Inst::with_operand(op, inc16)
     }
 }
 
@@ -38,11 +34,7 @@ mod tests {
         let bytes: [u8; 3] = [0b11101000, 0b00000000, 0b00000001];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Call),
-            Inst {
-                operation: Operation::Call,
-                first: Some(Operand::Increment(Inc::I16(256))),
-                second: None
-            }
+            Inst::with_operand(Operation::Call, Operand::Increment(Inc::I16(256)))
         );
     }
 }

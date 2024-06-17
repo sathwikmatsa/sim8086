@@ -23,11 +23,7 @@ impl InstructionDecoder for AccImd {
         let wide = Self::is_wide(first_byte);
         let data = Self::extract_data(first_byte, byte_stream).into();
         let acc = if wide { Register::AX } else { Register::AL }.into();
-        Inst {
-            operation: op,
-            first: Some(acc),
-            second: Some(data),
-        }
+        Inst::with_operands(op, acc, data)
     }
 }
 
@@ -44,11 +40,11 @@ mod tests {
         let bytes: [u8; 2] = [0b00111100, 0b00000001];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Cmp),
-            Inst {
-                operation: Operation::Cmp,
-                first: Some(Operand::Register(Register::AL)),
-                second: Some(Operand::Immediate(Data::U8(1)))
-            }
+            Inst::with_operands(
+                Operation::Cmp,
+                Operand::Register(Register::AL),
+                Operand::Immediate(Data::U8(1))
+            )
         );
     }
 
@@ -57,11 +53,11 @@ mod tests {
         let bytes: [u8; 3] = [0b00111101, 0b00000001, 0b00000001];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Cmp),
-            Inst {
-                operation: Operation::Cmp,
-                first: Some(Operand::Register(Register::AX)),
-                second: Some(Operand::Immediate(Data::U16(257)))
-            }
+            Inst::with_operands(
+                Operation::Cmp,
+                Operand::Register(Register::AX),
+                Operand::Immediate(Data::U16(257))
+            )
         );
     }
 }

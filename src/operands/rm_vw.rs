@@ -32,15 +32,15 @@ impl InstructionDecoder for RMVW {
 
         let rm = Self::extract_rm(first_byte, second_byte, byte_stream).into();
         let v = Self::is_v_set(first_byte);
-        Inst {
-            operation: op,
-            first: Some(rm),
-            second: Some(if v {
+        Inst::with_operands(
+            op,
+            rm,
+            if v {
                 Register::CL.into()
             } else {
                 Data::U8(1).into()
-            }),
-        }
+            },
+        )
     }
 }
 
@@ -56,11 +56,11 @@ mod tests {
         let bytes: [u8; 2] = [0b11010001, 0b11100011];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::SHL),
-            Inst {
-                first: Some(Operand::Register(Register::BX)),
-                second: Some(Operand::Immediate(Data::U8(1))),
-                operation: Operation::SHL
-            }
+            Inst::with_operands(
+                Operation::SHL,
+                Operand::Register(Register::BX),
+                Operand::Immediate(Data::U8(1))
+            )
         )
     }
 
@@ -69,11 +69,11 @@ mod tests {
         let bytes: [u8; 2] = [0b11010011, 0b11100011];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::SHL),
-            Inst {
-                first: Some(Operand::Register(Register::BX)),
-                second: Some(Operand::Register(Register::CL)),
-                operation: Operation::SHL
-            }
+            Inst::with_operands(
+                Operation::SHL,
+                Operand::Register(Register::BX),
+                Operand::Register(Register::CL)
+            )
         )
     }
 }

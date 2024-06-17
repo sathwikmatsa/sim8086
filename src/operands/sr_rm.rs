@@ -38,11 +38,11 @@ impl InstructionDecoder for SRRM {
         let sr = Self::extract_sr(second_byte).into();
         let is_sr_dest = Self::is_dest_in_reg_field(first_byte);
         let rm = Self::extract_rm(first_byte, second_byte, byte_stream).into();
-        Inst {
-            operation: op,
-            first: if is_sr_dest { Some(sr) } else { Some(rm) },
-            second: if is_sr_dest { Some(rm) } else { Some(sr) },
-        }
+        Inst::with_operands(
+            op,
+            if is_sr_dest { sr } else { rm },
+            if is_sr_dest { rm } else { sr },
+        )
     }
 }
 
@@ -58,11 +58,11 @@ mod tests {
         let bytes: [u8; 2] = [0b10001110, 0b11000011];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                second: Some(Operand::Register(Register::BX)),
-                first: Some(Operand::SR(SegmentRegister::ES)),
-                operation: Operation::Mov
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::SR(SegmentRegister::ES),
+                Operand::Register(Register::BX)
+            )
         )
     }
 
@@ -71,11 +71,11 @@ mod tests {
         let bytes: [u8; 2] = [0b10001100, 0b11000011];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                first: Some(Operand::Register(Register::BX)),
-                second: Some(Operand::SR(SegmentRegister::ES)),
-                operation: Operation::Mov
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::Register(Register::BX),
+                Operand::SR(SegmentRegister::ES)
+            )
         )
     }
 }

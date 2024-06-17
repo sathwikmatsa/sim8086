@@ -11,6 +11,32 @@ pub struct Inst {
     pub second: Option<Operand>,
 }
 
+impl Inst {
+    pub fn new(op: Operation) -> Self {
+        Inst {
+            operation: op,
+            first: None,
+            second: None,
+        }
+    }
+
+    pub fn with_operand(op: Operation, first: Operand) -> Self {
+        Inst {
+            operation: op,
+            first: Some(first),
+            second: None,
+        }
+    }
+
+    pub fn with_operands(op: Operation, first: Operand, second: Operand) -> Self {
+        Inst {
+            operation: op,
+            first: Some(first),
+            second: Some(second),
+        }
+    }
+}
+
 impl Display for Inst {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // special cases / workarounds / hacks

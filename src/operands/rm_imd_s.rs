@@ -30,112 +30,40 @@ impl InstructionDecoder for RMImdS {
             .to_owned();
         let rm = Self::extract_rm(first_byte, second_byte, byte_stream).into();
         let data = Self::extract_data(first_byte, byte_stream).into();
-        Inst {
-            operation: op,
-            first: Some(rm),
-            second: Some(data),
-        }
+        Inst::with_operands(op, rm, data)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::fields::{Data, EffectiveAddress, Operand, Register, Wide};
+    use crate::fields::{Data, Operand, Register};
 
     const DECODER: RMImdS = RMImdS;
 
     #[test]
-    fn immediate_to_register_wide() {
-        let bytes: [u8; 4] = [0b11000111, 0b11000011, 0b00000100, 0b00000001];
+    fn immediate_to_register_sign() {
+        let bytes: [u8; 3] = [0b10000010, 0b11000011, 0b00000100];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                operation: Operation::Mov,
-                first: Some(Operand::Register(Register::BX)),
-                second: Some(Operand::Immediate(Data::U16(260)))
-            }
+            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Add),
+            Inst::with_operands(
+                Operation::Add,
+                Operand::Register(Register::BL),
+                Operand::Immediate(Data::U16(4))
+            )
         )
     }
 
     #[test]
-    fn immediate_to_register_not_wide() {
-        let bytes: [u8; 3] = [0b11000110, 0b11000011, 0b00000100];
+    fn immediate_to_register_sign_not_set() {
+        let bytes: [u8; 4] = [0b10000001, 0b11000011, 0b00000100, 0b00000001];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                operation: Operation::Mov,
-                first: Some(Operand::Register(Register::BL)),
-                second: Some(Operand::Immediate(Data::U8(4)))
-            }
-        )
-    }
-
-    #[test]
-    fn immediate_to_mem_no_disp() {
-        let bytes: [u8; 3] = [0b11000110, 0b00000011, 0b00000101];
-        assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                operation: Operation::Mov,
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::BP_DI(
-                    None,
-                    Wide::Byte
-                ))),
-                second: Some(Operand::Immediate(Data::U8(5)))
-            }
-        )
-    }
-
-    #[test]
-    fn immediate_to_mem_direct_address() {
-        let bytes: [u8; 6] = [
-            0b11000111, 0b00000110, 0b00000100, 0b00000000, 0b00000000, 0b00000001,
-        ];
-        assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                operation: Operation::Mov,
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::DirectAddress(
-                    4,
-                    Wide::Word
-                ),)),
-                second: Some(Operand::Immediate(Data::U16(256)))
-            }
-        )
-    }
-
-    #[test]
-    fn immediate_to_mem_8bit_disp() {
-        let bytes: [u8; 4] = [0b11000110, 0b01000110, 0b00000100, 0b00000000];
-        assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                operation: Operation::Mov,
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::BP(
-                    4,
-                    Wide::Byte
-                ))),
-                second: Some(Operand::Immediate(Data::U8(0)))
-            }
-        )
-    }
-
-    #[test]
-    fn immediate_to_mem_16bit_disp() {
-        let bytes: [u8; 6] = [
-            0b11000111, 0b10000100, 0b00000100, 0b00000000, 0b00000000, 0b00000001,
-        ];
-        assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                operation: Operation::Mov,
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::SI(
-                    Some(4),
-                    Wide::Word
-                ))),
-                second: Some(Operand::Immediate(Data::U16(256)))
-            }
+            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Add),
+            Inst::with_operands(
+                Operation::Add,
+                Operand::Register(Register::BX),
+                Operand::Immediate(Data::U16(260))
+            )
         )
     }
 }

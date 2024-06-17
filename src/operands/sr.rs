@@ -19,11 +19,7 @@ impl InstructionDecoder for SR {
         op: Operation,
     ) -> Inst {
         let sr = Self::extract_sr(first_byte).into();
-        Inst {
-            operation: op,
-            first: Some(sr),
-            second: None,
-        }
+        Inst::with_operand(op, sr)
     }
 }
 
@@ -39,11 +35,7 @@ mod tests {
         let bytes: [u8; 1] = [0b00011110];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Push),
-            Inst {
-                first: Some(Operand::SR(SegmentRegister::DS)),
-                second: None,
-                operation: Operation::Push
-            }
+            Inst::with_operand(Operation::Push, Operand::SR(SegmentRegister::DS))
         )
     }
 }

@@ -26,11 +26,7 @@ impl InstructionDecoder for RegImd {
     ) -> Inst {
         let reg = Self::extract_reg(first_byte, first_byte).into();
         let data = Self::extract_data(first_byte, byte_stream).into();
-        Inst {
-            operation: op,
-            first: Some(reg),
-            second: Some(data),
-        }
+        Inst::with_operands(op, reg, data)
     }
 }
 
@@ -47,11 +43,11 @@ mod tests {
         let bytes: [u8; 2] = [0b10110000, 0b00000001];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                operation: Operation::Mov,
-                first: Some(Operand::Register(Register::AL)),
-                second: Some(Operand::Immediate(Data::U8(1)))
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::Register(Register::AL),
+                Operand::Immediate(Data::U8(1))
+            )
         );
     }
 
@@ -60,11 +56,11 @@ mod tests {
         let bytes: [u8; 3] = [0b10111000, 0b00000000, 0b00000001];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                operation: Operation::Mov,
-                first: Some(Operand::Register(Register::AX)),
-                second: Some(Operand::Immediate(Data::U16(256)))
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::Register(Register::AX),
+                Operand::Immediate(Data::U16(256))
+            )
         );
     }
 }

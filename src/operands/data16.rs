@@ -17,17 +17,13 @@ impl InstructionDecoder for Data16 {
         op: Operation,
     ) -> Inst {
         let data16 = Self::extract_data16(byte_stream).into();
-        Inst {
-            operation: op,
-            first: Some(data16),
-            second: None,
-        }
+        Inst::with_operand(op, data16)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::fields::{Data, Inc, Operand};
+    use crate::fields::{Data, Operand};
 
     use super::*;
 
@@ -38,11 +34,7 @@ mod tests {
         let bytes: [u8; 3] = [0b11000010, 0b00000000, 0b00000001];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Ret),
-            Inst {
-                operation: Operation::Ret,
-                first: Some(Operand::Immediate(Data::U16(256))),
-                second: None
-            }
+            Inst::with_operand(Operation::Ret, Operand::Immediate(Data::U16(256)))
         );
     }
 }

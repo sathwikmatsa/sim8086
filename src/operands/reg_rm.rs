@@ -36,11 +36,11 @@ impl InstructionDecoder for RegRM {
         let reg = Self::extract_reg(first_byte, second_byte).into();
         let is_reg_dest = Self::is_dest_in_reg_field(first_byte);
         let rm = Self::extract_rm(first_byte, second_byte, byte_stream).into();
-        Inst {
-            operation: op,
-            first: if is_reg_dest { Some(reg) } else { Some(rm) },
-            second: if is_reg_dest { Some(rm) } else { Some(reg) },
-        }
+        Inst::with_operands(
+            op,
+            if is_reg_dest { reg } else { rm },
+            if is_reg_dest { rm } else { reg },
+        )
     }
 }
 
@@ -56,11 +56,11 @@ mod tests {
         let bytes: [u8; 2] = [0b10001001, 0b11000011];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                second: Some(Operand::Register(Register::AX)),
-                first: Some(Operand::Register(Register::BX)),
-                operation: Operation::Mov
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::Register(Register::BX),
+                Operand::Register(Register::AX)
+            )
         )
     }
 
@@ -69,11 +69,11 @@ mod tests {
         let bytes: [u8; 2] = [0b10001000, 0b11000011];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                second: Some(Operand::Register(Register::AL)),
-                first: Some(Operand::Register(Register::BL)),
-                operation: Operation::Mov
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::Register(Register::BL),
+                Operand::Register(Register::AL)
+            )
         )
     }
 
@@ -82,14 +82,11 @@ mod tests {
         let bytes: [u8; 2] = [0b10001000, 0b00010011];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                second: Some(Operand::Register(Register::DL)),
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::BP_DI(
-                    None,
-                    Wide::Byte
-                ))),
-                operation: Operation::Mov
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::EffectiveAddress(EffectiveAddress::BP_DI(None, Wide::Byte)),
+                Operand::Register(Register::DL)
+            )
         )
     }
 
@@ -98,14 +95,11 @@ mod tests {
         let bytes: [u8; 4] = [0b10001001, 0b00010110, 0b00000001, 0b00000000];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                second: Some(Operand::Register(Register::DX)),
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::DirectAddress(
-                    1,
-                    Wide::Word
-                ))),
-                operation: Operation::Mov
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::EffectiveAddress(EffectiveAddress::DirectAddress(1, Wide::Word)),
+                Operand::Register(Register::DX)
+            )
         )
     }
 
@@ -114,14 +108,11 @@ mod tests {
         let bytes: [u8; 3] = [0b10001000, 0b01001110, 0b00000010];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                second: Some(Operand::Register(Register::CL)),
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::BP(
-                    2,
-                    Wide::Byte
-                ))),
-                operation: Operation::Mov
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::EffectiveAddress(EffectiveAddress::BP(2, Wide::Byte)),
+                Operand::Register(Register::CL)
+            )
         )
     }
 
@@ -130,14 +121,11 @@ mod tests {
         let bytes: [u8; 4] = [0b10001001, 0b10011000, 0b00000000, 0b00000001];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                second: Some(Operand::Register(Register::BX)),
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::BX_SI(
-                    Some(256),
-                    Wide::Word
-                ))),
-                operation: Operation::Mov
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::EffectiveAddress(EffectiveAddress::BX_SI(Some(256), Wide::Word)),
+                Operand::Register(Register::BX)
+            )
         )
     }
 
@@ -146,14 +134,11 @@ mod tests {
         let bytes: [u8; 4] = [0b10001011, 0b10011000, 0b00000000, 0b00000001];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                first: Some(Operand::Register(Register::BX)),
-                second: Some(Operand::EffectiveAddress(EffectiveAddress::BX_SI(
-                    Some(256),
-                    Wide::Word
-                ))),
-                operation: Operation::Mov
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::Register(Register::BX),
+                Operand::EffectiveAddress(EffectiveAddress::BX_SI(Some(256), Wide::Word))
+            )
         )
     }
 }

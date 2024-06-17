@@ -27,11 +27,7 @@ impl InstructionDecoder for RMW {
             .to_owned();
 
         let rm = Self::extract_rm(first_byte, second_byte, byte_stream).into();
-        Inst {
-            operation: op,
-            first: Some(rm),
-            second: None,
-        }
+        Inst::with_operand(op, rm)
     }
 }
 
@@ -47,11 +43,7 @@ mod tests {
         let bytes: [u8; 2] = [0b11111111, 0b11000011];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::INC),
-            Inst {
-                first: Some(Operand::Register(Register::BX)),
-                second: None,
-                operation: Operation::INC
-            }
+            Inst::with_operand(Operation::INC, Operand::Register(Register::BX))
         )
     }
 }

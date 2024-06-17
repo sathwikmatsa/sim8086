@@ -32,11 +32,7 @@ impl InstructionDecoder for DAAcc {
             ws,
         )
         .into();
-        Inst {
-            operation: op,
-            first: Some(direct_address),
-            second: Some(acc),
-        }
+        Inst::with_operands(op, direct_address, acc)
     }
 }
 
@@ -53,14 +49,11 @@ mod tests {
         let bytes: [u8; 2] = [0b10100010, 0b00000001];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                operation: Operation::Mov,
-                second: Some(Operand::Register(Register::AL)),
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::DirectAddress(
-                    1,
-                    Wide::Byte
-                )))
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::EffectiveAddress(EffectiveAddress::DirectAddress(1, Wide::Byte)),
+                Operand::Register(Register::AL)
+            )
         );
     }
 
@@ -69,27 +62,21 @@ mod tests {
         let bytes: [u8; 3] = [0b10100011, 0b00000000, 0b00000001];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                operation: Operation::Mov,
-                second: Some(Operand::Register(Register::AX)),
-                first: Some(Operand::EffectiveAddress(EffectiveAddress::DirectAddress(
-                    256,
-                    Wide::Word
-                )))
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::EffectiveAddress(EffectiveAddress::DirectAddress(256, Wide::Word)),
+                Operand::Register(Register::AX),
+            )
         );
     }
 
     #[test]
     fn print() {
-        let ins = Inst {
-            operation: Operation::Mov,
-            second: Some(Operand::Register(Register::AX)),
-            first: Some(Operand::EffectiveAddress(EffectiveAddress::DirectAddress(
-                256,
-                Wide::Word,
-            ))),
-        };
+        let ins = Inst::with_operands(
+            Operation::Mov,
+            Operand::EffectiveAddress(EffectiveAddress::DirectAddress(256, Wide::Word)),
+            Operand::Register(Register::AX),
+        );
         assert_eq!(format!("{}", ins), "mov word [256], ax");
     }
 }

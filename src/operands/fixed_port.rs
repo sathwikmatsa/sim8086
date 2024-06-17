@@ -21,19 +21,11 @@ impl InstructionDecoder for FixedPort {
         let wide = Self::is_wide(first_byte);
         let acc = if wide { Register::AX } else { Register::AL }.into();
         let data8 = Data::U8(byte_stream.next().expect("extract second byte").to_owned()).into();
-        Inst {
-            operation: op,
-            first: if op == Operation::IN {
-                Some(acc)
-            } else {
-                Some(data8)
-            },
-            second: if op == Operation::IN {
-                Some(data8)
-            } else {
-                Some(acc)
-            },
-        }
+        Inst::with_operands(
+            op,
+            if op == Operation::IN { acc } else { data8 },
+            if op == Operation::IN { data8 } else { acc },
+        )
     }
 }
 
@@ -50,11 +42,11 @@ mod tests {
         let bytes: [u8; 2] = [0b11100101, 0b00000001];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::IN),
-            Inst {
-                operation: Operation::IN,
-                second: Some(Operand::Immediate(Data::U8(1))),
-                first: Some(Operand::Register(Register::AX))
-            }
+            Inst::with_operands(
+                Operation::IN,
+                Operand::Register(Register::AX),
+                Operand::Immediate(Data::U8(1)),
+            )
         );
     }
 
@@ -63,11 +55,11 @@ mod tests {
         let bytes: [u8; 2] = [0b11100110, 0b00000001];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::OUT),
-            Inst {
-                operation: Operation::OUT,
-                second: Some(Operand::Immediate(Data::U8(1))),
-                first: Some(Operand::Register(Register::AL))
-            }
+            Inst::with_operands(
+                Operation::OUT,
+                Operand::Immediate(Data::U8(1)),
+                Operand::Register(Register::AL),
+            )
         );
     }
 }

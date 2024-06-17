@@ -24,11 +24,7 @@ impl InstructionDecoder for Reg {
         op: Operation,
     ) -> Inst {
         let reg = Self::extract_reg(first_byte, first_byte).into();
-        Inst {
-            operation: op,
-            first: Some(reg),
-            second: None,
-        }
+        Inst::with_operand(op, reg)
     }
 }
 
@@ -44,11 +40,7 @@ mod tests {
         let bytes: [u8; 1] = [0b01010011];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Push),
-            Inst {
-                first: Some(Operand::Register(Register::BX)),
-                second: None,
-                operation: Operation::Push
-            }
+            Inst::with_operand(Operation::Push, Operand::Register(Register::BX))
         )
     }
 }

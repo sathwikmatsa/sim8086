@@ -41,7 +41,7 @@ pub mod tests {
             0b00000000, 0b00000001,
         ];
         let instructions = decode_8086(&bytes[..]);
-        assert_eq!(instructions[0].to_string(), "mov [256], ax");
-        assert_eq!(instructions[1].to_string(), "mov [si + 4], word 256");
+        assert_eq!(instructions[0].to_string(), "mov word [256], ax");
+        assert_eq!(instructions[1].to_string(), "mov word [si + 4], 256");
     }
 }

@@ -17,11 +17,7 @@ impl InstructionDecoder for Inc8 {
         op: Operation,
     ) -> Inst {
         let inc8 = Self::extract_inc8(first_byte, byte_stream).into();
-        Inst {
-            operation: op,
-            first: Some(inc8),
-            second: None,
-        }
+        Inst::with_operand(op, inc8)
     }
 }
 
@@ -38,11 +34,7 @@ mod tests {
         let bytes: [u8; 2] = [0b01110100, 0b11111110];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::JE),
-            Inst {
-                operation: Operation::JE,
-                first: Some(Operand::Increment(Inc::I8(-2))),
-                second: None
-            }
+            Inst::with_operand(Operation::JE, Operand::Increment(Inc::I8(-2)))
         );
     }
 }

@@ -24,11 +24,7 @@ impl InstructionDecoder for AccReg {
         op: Operation,
     ) -> Inst {
         let reg = Self::extract_reg(first_byte, first_byte).into();
-        Inst {
-            operation: op,
-            first: Some(Operand::Register(Register::AX)),
-            second: Some(reg),
-        }
+        Inst::with_operands(op, Operand::Register(Register::AX), reg)
     }
 }
 
@@ -44,11 +40,11 @@ mod tests {
         let bytes: [u8; 1] = [0b10010110];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::XCHG),
-            Inst {
-                first: Some(Operand::Register(Register::AX)),
-                second: Some(Operand::Register(Register::SI)),
-                operation: Operation::XCHG
-            }
+            Inst::with_operands(
+                Operation::XCHG,
+                Operand::Register(Register::AX),
+                Operand::Register(Register::SI),
+            )
         )
     }
 }

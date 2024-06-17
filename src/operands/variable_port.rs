@@ -21,19 +21,11 @@ impl InstructionDecoder for VariablePort {
         let wide = Self::is_wide(first_byte);
         let acc = if wide { Register::AX } else { Register::AL }.into();
         let dx = Operand::Register(Register::DX);
-        Inst {
-            operation: op,
-            first: if op == Operation::IN {
-                Some(acc)
-            } else {
-                Some(dx)
-            },
-            second: if op == Operation::IN {
-                Some(dx)
-            } else {
-                Some(acc)
-            },
-        }
+        Inst::with_operands(
+            op,
+            if op == Operation::IN { acc } else { dx },
+            if op == Operation::IN { dx } else { acc },
+        )
     }
 }
 
@@ -48,11 +40,11 @@ mod tests {
         let bytes: [u8; 1] = [0b11101101];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::IN),
-            Inst {
-                operation: Operation::IN,
-                second: Some(Operand::Register(Register::DX)),
-                first: Some(Operand::Register(Register::AX))
-            }
+            Inst::with_operands(
+                Operation::IN,
+                Operand::Register(Register::AX),
+                Operand::Register(Register::DX)
+            )
         );
     }
 
@@ -61,11 +53,11 @@ mod tests {
         let bytes: [u8; 1] = [0b11101110];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::OUT),
-            Inst {
-                operation: Operation::OUT,
-                second: Some(Operand::Register(Register::DX)),
-                first: Some(Operand::Register(Register::AL))
-            }
+            Inst::with_operands(
+                Operation::OUT,
+                Operand::Register(Register::DX),
+                Operand::Register(Register::AL)
+            )
         );
     }
 }

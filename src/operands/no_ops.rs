@@ -13,11 +13,7 @@ impl InstructionDecoder for NoOps {
         _byte_stream: &mut std::iter::Peekable<std::slice::Iter<u8>>,
         op: Operation,
     ) -> Inst {
-        Inst {
-            operation: op,
-            first: None,
-            second: None,
-        }
+        Inst::new(op)
     }
 }
 
@@ -32,11 +28,7 @@ mod tests {
         let bytes: [u8; 1] = [0b11010111];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::XLAT),
-            Inst {
-                operation: Operation::XLAT,
-                second: None,
-                first: None
-            }
+            Inst::new(Operation::XLAT)
         );
     }
 }

@@ -32,11 +32,7 @@ impl InstructionDecoder for AccDA {
             ws,
         )
         .into();
-        Inst {
-            operation: op,
-            first: Some(acc),
-            second: Some(direct_address),
-        }
+        Inst::with_operands(op, acc, direct_address)
     }
 }
 
@@ -53,14 +49,11 @@ mod tests {
         let bytes: [u8; 2] = [0b10100000, 0b00000001];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                operation: Operation::Mov,
-                first: Some(Operand::Register(Register::AL)),
-                second: Some(Operand::EffectiveAddress(EffectiveAddress::DirectAddress(
-                    1,
-                    Wide::Byte
-                ),))
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::Register(Register::AL),
+                Operand::EffectiveAddress(EffectiveAddress::DirectAddress(1, Wide::Byte))
+            )
         );
     }
 
@@ -69,14 +62,11 @@ mod tests {
         let bytes: [u8; 3] = [0b10100001, 0b00000000, 0b00000001];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
-            Inst {
-                operation: Operation::Mov,
-                first: Some(Operand::Register(Register::AX)),
-                second: Some(Operand::EffectiveAddress(EffectiveAddress::DirectAddress(
-                    256,
-                    Wide::Word
-                )))
-            }
+            Inst::with_operands(
+                Operation::Mov,
+                Operand::Register(Register::AX),
+                Operand::EffectiveAddress(EffectiveAddress::DirectAddress(256, Wide::Word))
+            )
         );
     }
 }

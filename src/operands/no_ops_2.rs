@@ -14,11 +14,7 @@ impl InstructionDecoder for NoOps2 {
         op: Operation,
     ) -> Inst {
         byte_stream.next();
-        Inst {
-            operation: op,
-            first: None,
-            second: None,
-        }
+        Inst::new(op)
     }
 }
 
@@ -34,11 +30,7 @@ mod tests {
         let mut stream = bytes[1..].iter().peekable();
         assert_eq!(
             DECODER.decode(bytes[0], &mut stream, Operation::AAM),
-            Inst {
-                operation: Operation::AAM,
-                second: None,
-                first: None
-            }
+            Inst::new(Operation::AAM)
         );
         assert!(stream.next().is_none())
     }

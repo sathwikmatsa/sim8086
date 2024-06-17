@@ -32,11 +32,7 @@ impl InstructionDecoder for RegRMW {
 
         let reg = Self::extract_reg(first_byte, second_byte).into();
         let rm = Self::extract_rm(first_byte, second_byte, byte_stream).into();
-        Inst {
-            operation: op,
-            first: Some(reg),
-            second: Some(rm),
-        }
+        Inst::with_operands(op, reg, rm)
     }
 }
 
@@ -52,11 +48,11 @@ mod tests {
         let bytes: [u8; 2] = [0b10001101, 0b11000011];
         assert_eq!(
             DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::LEA),
-            Inst {
-                first: Some(Operand::Register(Register::AX)),
-                second: Some(Operand::Register(Register::BX)),
-                operation: Operation::LEA
-            }
+            Inst::with_operands(
+                Operation::LEA,
+                Operand::Register(Register::AX),
+                Operand::Register(Register::BX),
+            )
         )
     }
 }
