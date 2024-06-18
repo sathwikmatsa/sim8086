@@ -9,6 +9,16 @@ mod operands;
 use decoder::{decode_instruction, DecoderOut};
 use instruction::{Inst, InstructionDecoder, InstructionPrefix};
 
+fn join_prefix(prev: InstructionPrefix, curr: InstructionPrefix) -> InstructionPrefix {
+    match (prev, curr) {
+        (InstructionPrefix::Lock, InstructionPrefix::SegmentOverride(seg))
+        | (InstructionPrefix::SegmentOverride(seg), InstructionPrefix::Lock) => {
+            InstructionPrefix::LockSegmentOverride(seg)
+        }
+        _ => curr,
+    }
+}
+
 pub fn decode_8086(byte_stream: &[u8]) -> Vec<Inst> {
     let mut byte_stream = byte_stream.iter().peekable();
     let mut instructions = Vec::new();
@@ -25,7 +35,11 @@ pub fn decode_8086(byte_stream: &[u8]) -> Vec<Inst> {
                 instructions.push(inst);
             }
             DecoderOut::Prefix(prefix) => {
-                inst_prefix.replace(prefix);
+                if inst_prefix.is_some() {
+                    inst_prefix.replace(join_prefix(prefix, inst_prefix.unwrap()));
+                } else {
+                    inst_prefix.replace(prefix);
+                }
             }
         }
         first_instruction_byte = byte_stream.next();

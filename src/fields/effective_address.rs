@@ -43,6 +43,22 @@ pub enum EffectiveAddress {
     BX(Option<u16>, Wide),
 }
 
+impl EffectiveAddress {
+    pub fn wide(&self) -> Wide {
+        match self {
+            Self::DirectAddress(_, x) => *x,
+            Self::BX_SI(_, x) => *x,
+            Self::BX_DI(_, x) => *x,
+            Self::BP_SI(_, x) => *x,
+            Self::BP_DI(_, x) => *x,
+            Self::SI(_, x) => *x,
+            Self::DI(_, x) => *x,
+            Self::BP(_, x) => *x,
+            Self::BX(_, x) => *x,
+        }
+    }
+}
+
 impl From<EffectiveAddress> for Operand {
     fn from(val: EffectiveAddress) -> Self {
         Operand::EffectiveAddress(val)
@@ -57,35 +73,35 @@ fn disp_str_repr(d: &u16) -> String {
 impl fmt::Display for EffectiveAddress {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            EffectiveAddress::DirectAddress(x, w) => write!(f, "{}[{}]", w, x),
-            EffectiveAddress::BX_SI(x, w) => match x {
-                Some(y) => write!(f, "{}[bx + si {}]", w, disp_str_repr(y)),
-                None => write!(f, "{}[bx + si]", w),
+            EffectiveAddress::DirectAddress(x, _) => write!(f, "[{}]", x),
+            EffectiveAddress::BX_SI(x, _) => match x {
+                Some(y) => write!(f, "[bx + si {}]", disp_str_repr(y)),
+                None => write!(f, "[bx + si]"),
             },
-            EffectiveAddress::BX_DI(x, w) => match x {
-                Some(y) => write!(f, "{}[bx + di {}]", w, disp_str_repr(y)),
-                None => write!(f, "{}[bx + di]", w),
+            EffectiveAddress::BX_DI(x, _) => match x {
+                Some(y) => write!(f, "[bx + di {}]", disp_str_repr(y)),
+                None => write!(f, "[bx + di]"),
             },
-            EffectiveAddress::BP_SI(x, w) => match x {
-                Some(y) => write!(f, "{}[bp + si {}]", w, disp_str_repr(y)),
-                None => write!(f, "{}[bp + si]", w),
+            EffectiveAddress::BP_SI(x, _) => match x {
+                Some(y) => write!(f, "[bp + si {}]", disp_str_repr(y)),
+                None => write!(f, "[bp + si]"),
             },
-            EffectiveAddress::BP_DI(x, w) => match x {
-                Some(y) => write!(f, "{}[bp + di {}]", w, disp_str_repr(y)),
-                None => write!(f, "{}[bp + di]", w),
+            EffectiveAddress::BP_DI(x, _) => match x {
+                Some(y) => write!(f, "[bp + di {}]", disp_str_repr(y)),
+                None => write!(f, "[bp + di]"),
             },
-            EffectiveAddress::SI(x, w) => match x {
-                Some(y) => write!(f, "{}[si {}]", w, disp_str_repr(y)),
-                None => write!(f, "{}[si]", w),
+            EffectiveAddress::SI(x, _) => match x {
+                Some(y) => write!(f, "[si {}]", disp_str_repr(y)),
+                None => write!(f, "[si]"),
             },
-            EffectiveAddress::DI(x, w) => match x {
-                Some(y) => write!(f, "{}[di {}]", w, disp_str_repr(y)),
-                None => write!(f, "{}[di]", w),
+            EffectiveAddress::DI(x, _) => match x {
+                Some(y) => write!(f, "[di {}]", disp_str_repr(y)),
+                None => write!(f, "[di]"),
             },
-            EffectiveAddress::BP(x, w) => write!(f, "{}[bp {}]", w, disp_str_repr(x)),
-            EffectiveAddress::BX(x, w) => match x {
-                Some(y) => write!(f, "{}[bx {}]", w, disp_str_repr(y)),
-                None => write!(f, "{}[bx]", w),
+            EffectiveAddress::BP(x, _) => write!(f, "[bp {}]", disp_str_repr(x)),
+            EffectiveAddress::BX(x, _) => match x {
+                Some(y) => write!(f, "[bx {}]", disp_str_repr(y)),
+                None => write!(f, "[bx]"),
             },
         }
     }

@@ -100,10 +100,14 @@ pub enum Operation {
     STI,
     HLT,
     WAIT,
+
+    // instruction prefixes
     Lock,
     Rep,
-    SegmentOverride,
-    LockSegmentOverride,
+    SegmentOverrideES,
+    SegmentOverrideCS,
+    SegmentOverrideSS,
+    SegmentOverrideDS,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]

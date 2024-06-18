@@ -1,18 +1,38 @@
 use std::fmt::{self, Display};
 use std::iter::Peekable;
+use std::mem::swap;
 use std::slice::Iter;
+use std::str::FromStr;
 
-use enum_stringify::EnumStringify;
+use crate::fields::{Operand, Operation, SegmentRegister};
 
-use crate::fields::{Operand, Operation};
-
-#[derive(Debug, Default, PartialEq, EnumStringify, Copy, Clone)]
+#[derive(Debug, Default, PartialEq, Copy, Clone)]
 pub enum InstructionPrefix {
     #[default]
     Lock,
     Rep,
-    SegmentOverride,
-    LockSegmentOverride,
+    SegmentOverride(SegmentRegister),
+    LockSegmentOverride(SegmentRegister),
+}
+
+impl FromStr for InstructionPrefix {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "Lock" => Ok(Self::Lock),
+            "Rep" => Ok(Self::Rep),
+            "SegmentOverrideCS" => Ok(Self::SegmentOverride(SegmentRegister::CS)),
+            "SegmentOverrideES" => Ok(Self::SegmentOverride(SegmentRegister::ES)),
+            "SegmentOverrideDS" => Ok(Self::SegmentOverride(SegmentRegister::DS)),
+            "SegmentOverrideSS" => Ok(Self::SegmentOverride(SegmentRegister::SS)),
+            "LockSegmentOverrideCS" => Ok(Self::LockSegmentOverride(SegmentRegister::CS)),
+            "LockSegmentOverrideES" => Ok(Self::LockSegmentOverride(SegmentRegister::ES)),
+            "LockSegmentOverrideDS" => Ok(Self::LockSegmentOverride(SegmentRegister::DS)),
+            "LockSegmentOverrideSS" => Ok(Self::LockSegmentOverride(SegmentRegister::SS)),
+            _ => Err(()),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -60,7 +80,12 @@ impl Display for Inst {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // Handle instruction prefix
         if let Some(prefix) = self.prefix {
-            write!(f, "{} ", prefix.to_string().to_ascii_lowercase())?;
+            match prefix {
+                InstructionPrefix::Rep => write!(f, "rep ")?,
+                InstructionPrefix::Lock => write!(f, "lock ")?,
+                InstructionPrefix::LockSegmentOverride(_) => write!(f, "lock ")?,
+                _ => (),
+            }
         }
 
         // special cases / workarounds / hacks
@@ -72,21 +97,32 @@ impl Display for Inst {
         }
         // XCHG operand order shouldn't matter during runtime. This is just to make the binary testing
         // work
+        let mut first = self.first;
+        let mut second = self.second;
         if self.operation == Operation::XCHG && self.second.is_some() {
-            return write!(
-                f,
-                "{} {}, {}",
-                self.operation,
-                self.second.unwrap(),
-                self.first.unwrap()
-            );
+            swap(&mut first, &mut second);
         }
 
+        let handle_ea = |x: Operand| -> String {
+            if let Operand::EffectiveAddress(ea) = x {
+                let wide = ea.wide();
+                match self.prefix {
+                    Some(InstructionPrefix::SegmentOverride(x))
+                    | Some(InstructionPrefix::LockSegmentOverride(x)) => {
+                        format!("{}{}:{}", wide, x, ea)
+                    }
+                    _ => format!("{}{}", wide, ea),
+                }
+            } else {
+                x.to_string()
+            }
+        };
+
         write!(f, "{}", self.operation)?;
-        if self.first.is_some() {
-            write!(f, " {}", self.first.unwrap())?;
-            if self.second.is_some() {
-                write!(f, ", {}", self.second.unwrap())?;
+        if first.is_some() {
+            write!(f, " {}", handle_ea(first.unwrap()))?;
+            if second.is_some() {
+                write!(f, ", {}", handle_ea(second.unwrap()))?;
             }
         }
         Ok(())

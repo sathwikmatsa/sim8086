@@ -280,5 +280,29 @@ create_instruction_decoder!(
     (HLT, NoOps, [0b11110100], [0b11111111]),
     (WAIT, NoOps, [0b10011011], [0b11111111]),
     (Rep, InstructionPrefix, [0b11110010], [0b11111110]),
-    (Lock, InstructionPrefix, [0b11110000], [0b11111111])
+    (Lock, InstructionPrefix, [0b11110000], [0b11111111]),
+    (
+        SegmentOverrideES,
+        InstructionPrefix,
+        [0b00100110],
+        [0b11111111]
+    ),
+    (
+        SegmentOverrideCS,
+        InstructionPrefix,
+        [0b00101110],
+        [0b11111111]
+    ),
+    (
+        SegmentOverrideSS,
+        InstructionPrefix,
+        [0b00110110],
+        [0b11111111]
+    ),
+    (
+        SegmentOverrideDS,
+        InstructionPrefix,
+        [0b00111110],
+        [0b11111111]
+    )
 );
