@@ -279,5 +279,6 @@ create_instruction_decoder!(
     (STI, NoOps, [0b11111011], [0b11111111]),
     (HLT, NoOps, [0b11110100], [0b11111111]),
     (WAIT, NoOps, [0b10011011], [0b11111111]),
-    (Rep, InstructionPrefix, [0b11110010], [0b11111110])
+    (Rep, InstructionPrefix, [0b11110010], [0b11111110]),
+    (Lock, InstructionPrefix, [0b11110000], [0b11111111])
 );

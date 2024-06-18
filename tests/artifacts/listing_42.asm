@@ -390,3 +390,6 @@ cli
 sti
 hlt
 wait
+
+lock not byte [bp + 9905]
+lock xchg [100], al
