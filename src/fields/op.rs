@@ -85,8 +85,14 @@ pub enum Operation {
     SCASB,
     SCASW,
     Call,
+    #[enum_stringify(rename = "call far")]
+    CallFar,
     Jmp,
+    #[enum_stringify(rename = "jmp far")]
+    JmpFar,
     Ret,
+    #[enum_stringify(rename = "retf")]
+    RetFar,
     INT,
     INT3,
     INTO,
