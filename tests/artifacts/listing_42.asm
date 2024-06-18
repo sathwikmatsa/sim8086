@@ -415,8 +415,8 @@ lock not byte CS:[bp + 9905]
 ;
 mov [bx+si+59],es
 
-;jmp 2620
-;call 11804
+jmp 2620
+call 11804
 
 retf 17556
 ret 17560

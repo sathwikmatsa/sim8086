@@ -14,22 +14,11 @@ impl From<Inc> for Operand {
     }
 }
 
-impl From<&Inc> for i16 {
-    fn from(data: &Inc) -> Self {
-        match data {
-            Inc::I8(value) => value.to_owned() as i16,
-            Inc::I16(value) => value.to_owned(),
-        }
-    }
-}
-
 impl fmt::Display for Inc {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let val = i16::from(self);
-        if val >= 0 {
-            write!(f, "$+2+{}", val)
-        } else {
-            write!(f, "$+2{}", val)
+        match self {
+            Self::I8(x) => write!(f, "$+2+{}", x),
+            Self::I16(x) => write!(f, "$+3+{}", x),
         }
     }
 }
