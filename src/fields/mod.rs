@@ -1,3 +1,4 @@
+mod cs_ip;
 mod data;
 mod effective_address;
 mod inc;
@@ -6,6 +7,7 @@ mod register;
 mod rm;
 mod segment_register;
 
+pub use cs_ip::*;
 pub use data::*;
 pub use effective_address::*;
 pub use inc::*;

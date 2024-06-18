@@ -1,6 +1,7 @@
 mod acc_da;
 mod acc_imd;
 mod acc_reg;
+mod cs_ip;
 mod da_acc;
 mod data16;
 mod data8;
@@ -25,6 +26,7 @@ mod variable_port;
 pub use acc_da::*;
 pub use acc_imd::*;
 pub use acc_reg::*;
+pub use cs_ip::*;
 pub use da_acc::*;
 pub use data16::*;
 pub use data8::*;

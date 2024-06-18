@@ -1,5 +1,6 @@
 use crate::fields::{
-    register_from_u8, sr_from_u8, Data, EffectiveAddress, Inc, Register, SegmentRegister, Wide, RM,
+    register_from_u8, sr_from_u8, CsIp, Data, EffectiveAddress, Inc, Register, SegmentRegister,
+    Wide, RM,
 };
 
 pub trait WithSignField {
@@ -210,5 +211,25 @@ pub trait WithData8 {
     {
         let data = byte_stream.next().expect("extract data-8").to_owned();
         Data::U8(data)
+    }
+}
+
+pub trait WithCsIp {
+    fn extract_cs_ip<'a, I>(byte_stream: &mut I) -> CsIp
+    where
+        I: Iterator<Item = &'a u8>,
+    {
+        let ip_low = byte_stream.next().expect("extract ip-low").to_owned();
+        let ip_high = byte_stream.next().expect("extract ip-high").to_owned();
+        let ip: u16 = ((ip_high as u16) << 8) | (ip_low as u16);
+
+        let cs_low = byte_stream.next().expect("extract cs-low").to_owned();
+        let cs_high = byte_stream.next().expect("extract cs-high").to_owned();
+        let cs: u16 = ((cs_high as u16) << 8) | (cs_low as u16);
+
+        CsIp {
+            code_segment: cs,
+            instruction_pointer: ip,
+        }
     }
 }
