@@ -17,12 +17,14 @@ struct Registers {
     di: u16,
 }
 
-trait SetBytes {
+trait GetSetBytes {
     fn set_low(&mut self, value: u8);
     fn set_high(&mut self, value: u8);
+    fn get_low(&self) -> u8;
+    fn get_high(&self) -> u8;
 }
 
-impl SetBytes for u16 {
+impl GetSetBytes for u16 {
     fn set_high(&mut self, value: u8) {
         *self &= 0x00FF;
         *self |= (value as u16) << 8;
@@ -32,10 +34,44 @@ impl SetBytes for u16 {
         *self &= 0xFF00;
         *self |= value as u16;
     }
+
+    fn get_high(&self) -> u8 {
+        (*self >> 8) as u8
+    }
+
+    fn get_low(&self) -> u8 {
+        ((*self << 8) >> 8) as u8
+    }
 }
 
 impl Registers {
-    fn set(&mut self, reg: Register, imd: Data) {
+    fn set_reg(&mut self, to: Register, from: Register) {
+        let imd = self.get(from);
+        self.set_imd(to, imd);
+    }
+
+    fn get(&self, reg: Register) -> Data {
+        match reg {
+            Register::AX => Data::U16(self.ax),
+            Register::BX => Data::U16(self.bx),
+            Register::CX => Data::U16(self.cx),
+            Register::DX => Data::U16(self.dx),
+            Register::SP => Data::U16(self.sp),
+            Register::BP => Data::U16(self.bp),
+            Register::SI => Data::U16(self.si),
+            Register::DI => Data::U16(self.di),
+            Register::AL => Data::U8(self.ax.get_low()),
+            Register::BL => Data::U8(self.bx.get_low()),
+            Register::CL => Data::U8(self.cx.get_low()),
+            Register::DL => Data::U8(self.dx.get_low()),
+            Register::AH => Data::U8(self.ax.get_high()),
+            Register::BH => Data::U8(self.bx.get_high()),
+            Register::CH => Data::U8(self.cx.get_high()),
+            Register::DH => Data::U8(self.dx.get_high()),
+        }
+    }
+
+    fn set_imd(&mut self, reg: Register, imd: Data) {
         match reg {
             Register::AX => self.ax = u16::from(&imd),
             Register::BX => self.bx = u16::from(&imd),
@@ -102,7 +138,10 @@ impl Simulator {
 
                 match (first, second) {
                     (Operand::Register(reg), Operand::Immediate(data)) => {
-                        self.registers.set(reg, data)
+                        self.registers.set_imd(reg, data)
+                    }
+                    (Operand::Register(reg1), Operand::Register(reg2)) => {
+                        self.registers.set_reg(reg1, reg2)
                     }
                     _ => unimplemented!(),
                 }
@@ -125,23 +164,23 @@ mod tests {
     #[test]
     fn register_set_16() {
         let mut regs = Registers::default();
-        regs.set(Register::BX, Data::U16(8));
+        regs.set_imd(Register::BX, Data::U16(8));
         assert_eq!(regs.bx, 8)
     }
 
     #[test]
     fn register_set_low() {
         let mut regs = Registers::default();
-        regs.set(Register::BX, Data::U16(65535));
-        regs.set(Register::BL, Data::U8(0));
+        regs.set_imd(Register::BX, Data::U16(65535));
+        regs.set_imd(Register::BL, Data::U8(0));
         assert_eq!(regs.bx, 65280)
     }
 
     #[test]
     fn register_set_high() {
         let mut regs = Registers::default();
-        regs.set(Register::BX, Data::U16(65535));
-        regs.set(Register::BH, Data::U8(0));
+        regs.set_imd(Register::BX, Data::U16(65535));
+        regs.set_imd(Register::BH, Data::U8(0));
         assert_eq!(regs.bx, 255)
     }
 

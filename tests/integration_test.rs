@@ -87,3 +87,18 @@ fn simulate_immediate_movs() {
       di: 0x0008 (8)"#;
     assert_eq!(output.trim(), expected);
 }
+
+#[test]
+fn simulate_register_movs() {
+    let output = sim_test_fixture("listing_0044_register_movs");
+    let expected = r#"Final registers:
+      ax: 0x0004 (4)
+      bx: 0x0003 (3)
+      cx: 0x0002 (2)
+      dx: 0x0001 (1)
+      sp: 0x0001 (1)
+      bp: 0x0002 (2)
+      si: 0x0003 (3)
+      di: 0x0004 (4)"#;
+    assert_eq!(output.trim(), expected);
+}
