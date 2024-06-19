@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use crate::{
-    fields::{Data, Operand, Operation, Register},
+    fields::{Data, Operand, Operation, Register, SegmentRegister},
     instruction::Inst,
 };
 
@@ -15,6 +15,10 @@ struct Registers {
     bp: u16,
     si: u16,
     di: u16,
+    es: u16,
+    ss: u16,
+    ds: u16,
+    cs: u16,
 }
 
 trait GetSetBytes {
@@ -50,6 +54,25 @@ impl Registers {
         self.set_imd(to, imd);
     }
 
+    fn set_reg_from_sr(&mut self, reg: Register, sr: SegmentRegister) {
+        let imd = self.get_sr(sr);
+        self.set_imd(reg, imd);
+    }
+
+    fn set_sr_from_reg(&mut self, sr: SegmentRegister, reg: Register) {
+        let imd = self.get(reg);
+        self.set_sr_imd(sr, imd);
+    }
+
+    fn get_sr(&self, sr: SegmentRegister) -> Data {
+        match sr {
+            SegmentRegister::CS => Data::U16(self.cs),
+            SegmentRegister::DS => Data::U16(self.ds),
+            SegmentRegister::ES => Data::U16(self.es),
+            SegmentRegister::SS => Data::U16(self.ss),
+        }
+    }
+
     fn get(&self, reg: Register) -> Data {
         match reg {
             Register::AX => Data::U16(self.ax),
@@ -68,6 +91,15 @@ impl Registers {
             Register::BH => Data::U8(self.bx.get_high()),
             Register::CH => Data::U8(self.cx.get_high()),
             Register::DH => Data::U8(self.dx.get_high()),
+        }
+    }
+
+    fn set_sr_imd(&mut self, sr: SegmentRegister, imd: Data) {
+        match sr {
+            SegmentRegister::CS => self.cs = u16::from(&imd),
+            SegmentRegister::DS => self.ds = u16::from(&imd),
+            SegmentRegister::ES => self.es = u16::from(&imd),
+            SegmentRegister::SS => self.ss = u16::from(&imd),
         }
     }
 
@@ -120,6 +152,10 @@ impl Display for Registers {
         writeln!(f, "      bp: {:#06X} ({})", self.bp, self.bp)?;
         writeln!(f, "      si: {:#06X} ({})", self.si, self.si)?;
         writeln!(f, "      di: {:#06X} ({})", self.di, self.di)?;
+        writeln!(f, "      cs: {:#06X} ({})", self.cs, self.cs)?;
+        writeln!(f, "      ds: {:#06X} ({})", self.ds, self.ds)?;
+        writeln!(f, "      ss: {:#06X} ({})", self.ss, self.ss)?;
+        writeln!(f, "      es: {:#06X} ({})", self.es, self.es)?;
         Ok(())
     }
 }
@@ -142,6 +178,12 @@ impl Simulator {
                     }
                     (Operand::Register(reg1), Operand::Register(reg2)) => {
                         self.registers.set_reg(reg1, reg2)
+                    }
+                    (Operand::Register(reg), Operand::SR(sr)) => {
+                        self.registers.set_reg_from_sr(reg, sr)
+                    }
+                    (Operand::SR(sr), Operand::Register(reg)) => {
+                        self.registers.set_sr_from_reg(sr, reg)
                     }
                     _ => unimplemented!(),
                 }
