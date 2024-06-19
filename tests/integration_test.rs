@@ -84,11 +84,7 @@ fn simulate_immediate_movs() {
       sp: 0x0005 (5)
       bp: 0x0006 (6)
       si: 0x0007 (7)
-      di: 0x0008 (8)
-      cs: 0x0000 (0)
-      ds: 0x0000 (0)
-      ss: 0x0000 (0)
-      es: 0x0000 (0)"#;
+      di: 0x0008 (8)"#;
     assert_eq!(output.trim(), expected);
 }
 
@@ -103,11 +99,7 @@ fn simulate_register_movs() {
       sp: 0x0001 (1)
       bp: 0x0002 (2)
       si: 0x0003 (3)
-      di: 0x0004 (4)
-      cs: 0x0000 (0)
-      ds: 0x0000 (0)
-      ss: 0x0000 (0)
-      es: 0x0000 (0)"#;
+      di: 0x0004 (4)"#;
     assert_eq!(output.trim(), expected);
 }
 
@@ -123,7 +115,6 @@ fn simulate_challenge_register_movs() {
       bp: 0x3344 (13124)
       si: 0x6677 (26231)
       di: 0x7788 (30600)
-      cs: 0x0000 (0)
       ds: 0x3344 (13124)
       ss: 0x4411 (17425)
       es: 0x6677 (26231)"#;

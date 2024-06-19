@@ -141,21 +141,35 @@ impl Registers {
     }
 }
 
+macro_rules! write_if_non_zero {
+    ($f:expr, $self:ident, $field:ident) => {
+        if $self.$field != 0 {
+            writeln!(
+                $f,
+                "      {}: {:#06X} ({})",
+                stringify!($field),
+                $self.$field,
+                $self.$field
+            )?;
+        }
+    };
+}
+
 impl Display for Registers {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Final registers:")?;
-        writeln!(f, "      ax: {:#06X} ({})", self.ax, self.ax)?;
-        writeln!(f, "      bx: {:#06X} ({})", self.bx, self.bx)?;
-        writeln!(f, "      cx: {:#06X} ({})", self.cx, self.cx)?;
-        writeln!(f, "      dx: {:#06X} ({})", self.dx, self.dx)?;
-        writeln!(f, "      sp: {:#06X} ({})", self.sp, self.sp)?;
-        writeln!(f, "      bp: {:#06X} ({})", self.bp, self.bp)?;
-        writeln!(f, "      si: {:#06X} ({})", self.si, self.si)?;
-        writeln!(f, "      di: {:#06X} ({})", self.di, self.di)?;
-        writeln!(f, "      cs: {:#06X} ({})", self.cs, self.cs)?;
-        writeln!(f, "      ds: {:#06X} ({})", self.ds, self.ds)?;
-        writeln!(f, "      ss: {:#06X} ({})", self.ss, self.ss)?;
-        writeln!(f, "      es: {:#06X} ({})", self.es, self.es)?;
+        write_if_non_zero!(f, self, ax);
+        write_if_non_zero!(f, self, bx);
+        write_if_non_zero!(f, self, cx);
+        write_if_non_zero!(f, self, dx);
+        write_if_non_zero!(f, self, sp);
+        write_if_non_zero!(f, self, bp);
+        write_if_non_zero!(f, self, si);
+        write_if_non_zero!(f, self, di);
+        write_if_non_zero!(f, self, cs);
+        write_if_non_zero!(f, self, ds);
+        write_if_non_zero!(f, self, ss);
+        write_if_non_zero!(f, self, es);
         Ok(())
     }
 }
