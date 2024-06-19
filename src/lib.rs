@@ -3,8 +3,9 @@ use std::io::{self, Write};
 mod decoder;
 mod extractors;
 mod fields;
-mod instruction;
+pub mod instruction;
 mod operands;
+pub mod simulator;
 
 use decoder::{decode_instruction, DecoderOut};
 use instruction::{Inst, InstructionDecoder, InstructionPrefix};
@@ -47,7 +48,7 @@ pub fn decode_8086(byte_stream: &[u8]) -> Vec<Inst> {
     instructions
 }
 
-pub fn write_8086(instructions: Vec<Inst>, f: &mut impl Write) -> Result<(), io::Error> {
+pub fn write_8086(instructions: &Vec<Inst>, f: &mut impl Write) -> Result<(), io::Error> {
     writeln!(f, "bits 16;")?;
     for instruction in instructions {
         writeln!(f, "{}", instruction)?;

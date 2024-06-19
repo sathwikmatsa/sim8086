@@ -19,5 +19,5 @@ fn main() {
     let out_filepath = format!("{}.8086.decoded", file_path);
     let mut out_file = File::create(out_filepath).expect("Open output file");
 
-    write_8086(instructions, &mut out_file).expect("Failed to write to output file");
+    write_8086(&instructions, &mut out_file).expect("Failed to write to output file");
 }

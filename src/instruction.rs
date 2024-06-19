@@ -62,11 +62,33 @@ impl Inst {
         }
     }
 
+    pub fn with_operand_v2(op: Operation, first: impl Into<Operand>) -> Self {
+        Inst {
+            operation: op,
+            first: Some(first.into()),
+            second: None,
+            prefix: None,
+        }
+    }
+
     pub fn with_operands(op: Operation, first: Operand, second: Operand) -> Self {
         Inst {
             operation: op,
             first: Some(first),
             second: Some(second),
+            prefix: None,
+        }
+    }
+
+    pub fn with_operands_v2(
+        op: Operation,
+        first: impl Into<Operand>,
+        second: impl Into<Operand>,
+    ) -> Self {
+        Inst {
+            operation: op,
+            first: Some(first.into()),
+            second: Some(second.into()),
             prefix: None,
         }
     }

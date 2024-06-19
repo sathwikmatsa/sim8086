@@ -23,6 +23,16 @@ impl From<&Data> for u16 {
     }
 }
 
+impl TryFrom<&Data> for u8 {
+    type Error = ();
+    fn try_from(value: &Data) -> Result<Self, Self::Error> {
+        match value {
+            Data::U8(data) => Ok(data.to_owned()),
+            _ => Err(()),
+        }
+    }
+}
+
 impl fmt::Display for Data {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", u16::from(self))
