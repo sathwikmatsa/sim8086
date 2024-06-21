@@ -1,12 +1,18 @@
 use std::fmt::Display;
 
-use crate::fields::Data;
+use crate::{
+    fields::{Carry, Data, DataWithCarry, HalfCarry},
+    handlers::ArithmeticOp,
+};
 
 #[derive(Default, PartialEq)]
 pub struct Flags {
     pub zero: bool,
     pub sign: bool,
     pub parity: bool,
+    pub carry: bool,
+    pub overflow: bool,
+    pub auxiliary: bool,
 }
 
 macro_rules! generate_flag_checks {
@@ -31,6 +37,9 @@ macro_rules! generate_flag_checks {
 
 impl Display for Flags {
     generate_flag_checks!(
+        auxiliary => "A",
+        carry => "C",
+        overflow => "O",
         parity => "P",
         sign => "S",
         zero => "Z"
@@ -38,9 +47,21 @@ impl Display for Flags {
 }
 
 impl Flags {
-    pub fn set(&mut self, computation: Data) {
-        self.zero = computation.is_zero();
-        self.parity = computation.is_even_parity();
-        self.sign = computation.is_signed();
+    pub fn set(&mut self, lhs: Data, rhs: Data, op: ArithmeticOp, computation: DataWithCarry) {
+        let DataWithCarry(value, Carry(carry), HalfCarry(half_carry)) = computation;
+        self.zero = value.is_zero();
+        self.parity = value.is_lower_byte_even_parity();
+        self.sign = value.is_signed();
+        self.carry = carry;
+
+        self.overflow = matches!(
+            (lhs.is_signed(), rhs.is_signed(), op, value.is_signed()),
+            (false, false, ArithmeticOp::Add, true)
+                | (true, true, ArithmeticOp::Add, false)
+                | (true, false, ArithmeticOp::Sub | ArithmeticOp::Cmp, false)
+                | (false, true, ArithmeticOp::Sub | ArithmeticOp::Cmp, true)
+        );
+
+        self.auxiliary = half_carry;
     }
 }

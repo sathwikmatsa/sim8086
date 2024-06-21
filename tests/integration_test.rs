@@ -131,3 +131,14 @@ fn simulate_add_sub_cmp() {
    flags: PZ"#;
     assert_eq!(output.trim(), expected);
 }
+#[test]
+fn simulate_challenge_flags() {
+    let output = sim_test_fixture("listing_0047_challenge_flags");
+    let expected = r#"Final registers:
+      bx: 0x9ca5 (40101)
+      dx: 0x000a (10)
+      sp: 0x0063 (99)
+      bp: 0x0062 (98)
+   flags: ACPS"#;
+    assert_eq!(output.trim(), expected);
+}

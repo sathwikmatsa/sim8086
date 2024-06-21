@@ -2,7 +2,7 @@ use enum_stringify::EnumStringify;
 
 use crate::{
     cpu::{Flags, Registers},
-    fields::{Data, Operand},
+    fields::{Data, DataWithCarry, Operand},
     instruction::Inst,
 };
 
@@ -15,7 +15,7 @@ pub enum ArithmeticOp {
 }
 
 impl ArithmeticOp {
-    fn compute(&self, lhs: Data, rhs: Data) -> Data {
+    fn compute(&self, lhs: Data, rhs: Data) -> DataWithCarry {
         match self {
             Self::Add => lhs + rhs,
             Self::Sub => lhs - rhs,
@@ -42,18 +42,18 @@ pub fn handle_arithmetic(
             let lhs = registers.get(reg);
             let newval = op.compute(lhs, rhs);
             if op != ArithmeticOp::Cmp {
-                registers.set_imd(reg, newval);
+                registers.set_imd(reg, newval.0);
             }
-            flags.set(newval);
+            flags.set(lhs, rhs, op, newval);
         }
         (Operand::Register(reg1), Operand::Register(reg2)) => {
             let lhs = registers.get(reg1);
             let rhs = registers.get(reg2);
             let newval = op.compute(lhs, rhs);
             if op != ArithmeticOp::Cmp {
-                registers.set_imd(reg1, newval);
+                registers.set_imd(reg1, newval.0);
             }
-            flags.set(newval);
+            flags.set(lhs, rhs, op, newval);
         }
         _ => unimplemented!(),
     }
