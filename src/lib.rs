@@ -1,5 +1,6 @@
 use std::io::{self, Write};
 
+mod cpu;
 mod decoder;
 mod extractors;
 mod fields;
