@@ -143,7 +143,7 @@ macro_rules! write_if_non_zero {
         if $self.$field != 0 {
             writeln!(
                 $f,
-                "      {}: {:#06X} ({})",
+                "      {}: {:#06x} ({})",
                 stringify!($field),
                 $self.$field,
                 $self.$field

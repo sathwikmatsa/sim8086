@@ -1,4 +1,5 @@
 use std::fmt;
+use std::ops;
 
 use super::Operand;
 
@@ -6,6 +7,40 @@ use super::Operand;
 pub enum Data {
     U8(u8),
     U16(u16),
+}
+
+impl ops::Add<Data> for Data {
+    type Output = Data;
+
+    fn add(self, rhs: Data) -> Self::Output {
+        match self {
+            Self::U8(x) => match rhs {
+                Self::U8(y) => Data::U8(x + y),
+                Self::U16(y) => Data::U16(x as u16 + y),
+            },
+            Self::U16(x) => match rhs {
+                Self::U8(y) => Data::U16(x + y as u16),
+                Self::U16(y) => Data::U16(x + y),
+            },
+        }
+    }
+}
+
+impl ops::Sub<Data> for Data {
+    type Output = Data;
+
+    fn sub(self, rhs: Data) -> Self::Output {
+        match self {
+            Self::U8(x) => match rhs {
+                Self::U8(y) => Data::U8(x - y),
+                Self::U16(y) => Data::U16(x as u16 - y),
+            },
+            Self::U16(x) => match rhs {
+                Self::U8(y) => Data::U16(x - y as u16),
+                Self::U16(y) => Data::U16(x - y),
+            },
+        }
+    }
 }
 
 impl From<Data> for Operand {
@@ -36,5 +71,23 @@ impl TryFrom<&Data> for u8 {
 impl fmt::Display for Data {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", u16::from(self))
+    }
+}
+
+impl Data {
+    pub fn is_zero(&self) -> bool {
+        u16::from(self) == 0
+    }
+    pub fn is_signed(&self) -> bool {
+        match self {
+            Self::U8(x) => (x >> 7) == 1,
+            Self::U16(x) => (x >> 15) == 1,
+        }
+    }
+    pub fn is_even_parity(&self) -> bool {
+        match self {
+            Self::U8(x) => x.count_ones() % 2 == 0,
+            Self::U16(x) => x.count_ones() % 2 == 0,
+        }
     }
 }

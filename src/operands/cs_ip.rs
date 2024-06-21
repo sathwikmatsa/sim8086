@@ -1,5 +1,5 @@
 use crate::{
-    extractors::WithCsIp,
+    disasm::WithCsIp,
     fields::Operation,
     instruction::{Inst, InstructionDecoder},
 };

@@ -1,5 +1,5 @@
 use crate::{
-    extractors::{WithRegField, WithWideField},
+    disasm::{WithRegField, WithWideField},
     fields::{Operand, Operation, Register},
     instruction::{Inst, InstructionDecoder},
 };

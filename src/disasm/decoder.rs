@@ -1,6 +1,7 @@
 use instruction::InstructionPrefix;
 
 use crate::fields::Operation;
+use crate::instruction::InstructionDecoder;
 use crate::operands::*;
 use crate::*;
 use std::str::FromStr;

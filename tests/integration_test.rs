@@ -120,3 +120,14 @@ fn simulate_challenge_register_movs() {
       es: 0x6677 (26231)"#;
     assert_eq!(output.trim(), expected);
 }
+
+#[test]
+fn simulate_add_sub_cmp() {
+    let output = sim_test_fixture("listing_0046_add_sub_cmp");
+    let expected = r#"Final registers:
+      bx: 0xe102 (57602)
+      cx: 0x0f01 (3841)
+      sp: 0x03e6 (998)
+   flags: PZ"#;
+    assert_eq!(output.trim(), expected);
+}

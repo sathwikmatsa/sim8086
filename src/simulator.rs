@@ -1,39 +1,40 @@
 use std::fmt::Display;
 
 use crate::{
-    cpu::Registers,
-    fields::{Operand, Operation},
+    cpu::{Flags, Registers},
+    fields::Operation,
+    handlers::*,
     instruction::Inst,
 };
 
 #[derive(Default)]
 pub struct Simulator {
-    registers: Registers,
+    pub registers: Registers,
+    pub flags: Flags,
 }
 
 impl Simulator {
     pub fn exec(&mut self, inst: &Inst) {
         match inst.operation {
-            Operation::Mov => {
-                let first = inst.first.expect("mov has first operand");
-                let second = inst.second.expect("mov has second operand");
-
-                match (first, second) {
-                    (Operand::Register(reg), Operand::Immediate(data)) => {
-                        self.registers.set_imd(reg, data)
-                    }
-                    (Operand::Register(reg1), Operand::Register(reg2)) => {
-                        self.registers.set_reg(reg1, reg2)
-                    }
-                    (Operand::Register(reg), Operand::SR(sr)) => {
-                        self.registers.set_reg_from_sr(reg, sr)
-                    }
-                    (Operand::SR(sr), Operand::Register(reg)) => {
-                        self.registers.set_sr_from_reg(sr, reg)
-                    }
-                    _ => unimplemented!(),
-                }
-            }
+            Operation::Mov => handle_mov(inst, &mut self.registers),
+            Operation::Add => handle_arithmetic(
+                ArithmeticOp::Add,
+                inst,
+                &mut self.registers,
+                &mut self.flags,
+            ),
+            Operation::Sub => handle_arithmetic(
+                ArithmeticOp::Sub,
+                inst,
+                &mut self.registers,
+                &mut self.flags,
+            ),
+            Operation::Cmp => handle_arithmetic(
+                ArithmeticOp::Cmp,
+                inst,
+                &mut self.registers,
+                &mut self.flags,
+            ),
             _ => unimplemented!(),
         }
     }
@@ -41,7 +42,8 @@ impl Simulator {
 
 impl Display for Simulator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.registers)
+        write!(f, "{}", self.registers)?;
+        write!(f, "{}", self.flags)
     }
 }
 
