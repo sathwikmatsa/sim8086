@@ -33,8 +33,8 @@ impl ops::Add<Data> for Data {
                 Self::U8(_) => unreachable!(),
                 Self::U16(y) => {
                     let (val, carry) = x.overflowing_add(y);
-                    let xnibble = ((x << 12) >> 4) as u8;
-                    let ynibble = ((y << 12) >> 4) as u8;
+                    let xnibble = ((x << 12) >> 12) as u8;
+                    let ynibble = ((y << 12) >> 12) as u8;
                     let half_carry = xnibble + ynibble > NIBBLE_MAX;
                     DataWithCarry(Data::U16(val), Carry(carry), HalfCarry(half_carry))
                 }
