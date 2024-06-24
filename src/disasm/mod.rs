@@ -5,7 +5,10 @@ pub use extractors::*;
 
 use std::io::{self, Write};
 
-use crate::instruction::{Inst, InstructionPrefix};
+use crate::{
+    instruction::{Inst, InstructionPrefix},
+    ByteStream,
+};
 use decoder::{decode_instruction, DecoderOut};
 
 fn join_prefix(prev: InstructionPrefix, curr: InstructionPrefix) -> InstructionPrefix {
@@ -19,11 +22,19 @@ fn join_prefix(prev: InstructionPrefix, curr: InstructionPrefix) -> InstructionP
 }
 
 pub fn decode_8086(byte_stream: &[u8]) -> Vec<Inst> {
-    let mut byte_stream = byte_stream.iter().peekable();
-    let mut instructions = Vec::new();
-    let mut first_instruction_byte = byte_stream.next();
+    let mut byte_stream = ByteStream::new(byte_stream.iter());
+    let mut instructions: Vec<Inst> = Vec::new();
+    let mut first_instruction_byte = byte_stream.next_with_index();
     let mut inst_prefix: Option<InstructionPrefix> = None;
-    while let Some(&first_byte) = first_instruction_byte {
+    let mut start_idx = 0;
+    while let Some((end_idx, &first_byte)) = first_instruction_byte {
+        if end_idx != start_idx {
+            instructions
+                .last_mut()
+                .expect("atleast one instruction is decoded")
+                .set_size(end_idx - start_idx);
+            start_idx = end_idx;
+        }
         let second_byte = byte_stream.peek().map(|&v| *v);
         match decode_instruction(first_byte, second_byte).unwrap() {
             DecoderOut::Inst(op, decoder) => {
@@ -41,7 +52,13 @@ pub fn decode_8086(byte_stream: &[u8]) -> Vec<Inst> {
                 }
             }
         }
-        first_instruction_byte = byte_stream.next();
+        first_instruction_byte = byte_stream.next_with_index();
+    }
+    if start_idx != 0 {
+        instructions
+            .last_mut()
+            .expect("atleast one instruction is decoded")
+            .set_size(byte_stream.vended_count() - start_idx);
     }
     instructions
 }

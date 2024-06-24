@@ -1,10 +1,9 @@
 use std::fmt::{self, Display};
-use std::iter::Peekable;
 use std::mem::swap;
-use std::slice::Iter;
 use std::str::FromStr;
 
 use crate::fields::{Operand, Operation, SegmentRegister};
+use crate::ByteStream;
 
 #[derive(Debug, Default, PartialEq, Copy, Clone)]
 pub enum InstructionPrefix {
@@ -41,6 +40,7 @@ pub struct Inst {
     pub first: Option<Operand>,
     pub second: Option<Operand>,
     pub prefix: Option<InstructionPrefix>,
+    size: Option<usize>,
 }
 
 impl Inst {
@@ -50,6 +50,7 @@ impl Inst {
             first: None,
             second: None,
             prefix: None,
+            size: None,
         }
     }
 
@@ -59,6 +60,7 @@ impl Inst {
             first: Some(first),
             second: None,
             prefix: None,
+            size: None,
         }
     }
 
@@ -68,6 +70,7 @@ impl Inst {
             first: Some(first.into()),
             second: None,
             prefix: None,
+            size: None,
         }
     }
 
@@ -77,6 +80,7 @@ impl Inst {
             first: Some(first),
             second: Some(second),
             prefix: None,
+            size: None,
         }
     }
 
@@ -90,11 +94,20 @@ impl Inst {
             first: Some(first.into()),
             second: Some(second.into()),
             prefix: None,
+            size: None,
         }
     }
 
     pub fn add_instruction_prefix(&mut self, prefix: InstructionPrefix) {
         self.prefix = Some(prefix);
+    }
+
+    pub fn set_size(&mut self, len: usize) {
+        self.size = Some(len);
+    }
+
+    pub fn size(&self) -> Option<usize> {
+        self.size
     }
 }
 
@@ -152,16 +165,11 @@ impl Display for Inst {
 }
 
 pub trait InstructionDecoder {
-    fn decode(&self, first_byte: u8, byte_stream: &mut Peekable<Iter<u8>>, op: Operation) -> Inst;
+    fn decode(&self, first_byte: u8, byte_stream: &mut ByteStream, op: Operation) -> Inst;
 }
 
 impl InstructionDecoder for InstructionPrefix {
-    fn decode(
-        &self,
-        _first_byte: u8,
-        _byte_stream: &mut Peekable<Iter<u8>>,
-        _op: Operation,
-    ) -> Inst {
+    fn decode(&self, _first_byte: u8, _byte_stream: &mut ByteStream, _op: Operation) -> Inst {
         // this is a dirty hack to let the macro in decoder.rs compile
         unreachable!()
     }

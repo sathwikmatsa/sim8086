@@ -2,6 +2,7 @@ use crate::{
     disasm::{WithRegField, WithWideField},
     fields::Operation,
     instruction::{Inst, InstructionDecoder},
+    ByteStream,
 };
 
 #[derive(Default)]
@@ -17,12 +18,7 @@ impl WithWideField for Reg {
 }
 
 impl InstructionDecoder for Reg {
-    fn decode(
-        &self,
-        first_byte: u8,
-        _byte_stream: &mut std::iter::Peekable<std::slice::Iter<'_, u8>>,
-        op: Operation,
-    ) -> Inst {
+    fn decode(&self, first_byte: u8, _byte_stream: &mut ByteStream, op: Operation) -> Inst {
         let reg = Self::extract_reg(first_byte, first_byte).into();
         Inst::with_operand(op, reg)
     }
@@ -39,7 +35,11 @@ mod tests {
     fn reg() {
         let bytes: [u8; 1] = [0b01010011];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Push),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Push
+            ),
             Inst::with_operand(Operation::Push, Operand::Register(Register::BX))
         )
     }

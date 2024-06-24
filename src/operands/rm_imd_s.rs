@@ -2,6 +2,7 @@ use crate::{
     disasm::{WithDataS, WithRMField, WithSignField, WithWideField},
     fields::Operation,
     instruction::{Inst, InstructionDecoder},
+    ByteStream,
 };
 
 #[derive(Default)]
@@ -18,12 +19,7 @@ impl WithWideField for RMImdS {
 }
 
 impl InstructionDecoder for RMImdS {
-    fn decode(
-        &self,
-        first_byte: u8,
-        byte_stream: &mut std::iter::Peekable<std::slice::Iter<'_, u8>>,
-        op: Operation,
-    ) -> Inst {
+    fn decode(&self, first_byte: u8, byte_stream: &mut ByteStream, op: Operation) -> Inst {
         let second_byte = byte_stream
             .next()
             .expect("extract second instruction byte")
@@ -45,7 +41,11 @@ mod tests {
     fn immediate_to_register_sign() {
         let bytes: [u8; 3] = [0b10000010, 0b11000011, 0b00000100];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Add),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Add
+            ),
             Inst::with_operands(
                 Operation::Add,
                 Operand::Register(Register::BL),
@@ -58,7 +58,11 @@ mod tests {
     fn immediate_to_register_sign_not_set() {
         let bytes: [u8; 4] = [0b10000001, 0b11000011, 0b00000100, 0b00000001];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Add),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Add
+            ),
             Inst::with_operands(
                 Operation::Add,
                 Operand::Register(Register::BX),

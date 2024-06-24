@@ -2,6 +2,7 @@ use crate::{
     disasm::{WithData, WithRegField, WithWideField},
     fields::Operation,
     instruction::{Inst, InstructionDecoder},
+    ByteStream,
 };
 
 #[derive(Default)]
@@ -18,12 +19,7 @@ impl WithRegField for RegImd {
 impl WithData for RegImd {}
 
 impl InstructionDecoder for RegImd {
-    fn decode(
-        &self,
-        first_byte: u8,
-        byte_stream: &mut std::iter::Peekable<std::slice::Iter<'_, u8>>,
-        op: Operation,
-    ) -> Inst {
+    fn decode(&self, first_byte: u8, byte_stream: &mut ByteStream, op: Operation) -> Inst {
         let reg = Self::extract_reg(first_byte, first_byte).into();
         let data = Self::extract_data(first_byte, byte_stream).into();
         Inst::with_operands(op, reg, data)
@@ -42,7 +38,11 @@ mod tests {
     fn not_wide() {
         let bytes: [u8; 2] = [0b10110000, 0b00000001];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Mov
+            ),
             Inst::with_operands(
                 Operation::Mov,
                 Operand::Register(Register::AL),
@@ -55,7 +55,11 @@ mod tests {
     fn wide() {
         let bytes: [u8; 3] = [0b10111000, 0b00000000, 0b00000001];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Mov
+            ),
             Inst::with_operands(
                 Operation::Mov,
                 Operand::Register(Register::AX),

@@ -11,10 +11,18 @@ use crate::{
 pub struct Simulator {
     pub registers: Registers,
     pub flags: Flags,
+    pub ip: u16,
+    log_ip: bool,
 }
 
 impl Simulator {
+    pub fn enable_ip_log(&mut self) {
+        self.log_ip = true;
+    }
+
     pub fn exec(&mut self, inst: &Inst) {
+        self.ip += inst.size().expect("size is set in decoder phase") as u16;
+
         match inst.operation {
             Operation::Mov => handle_mov(inst, &mut self.registers),
             Operation::Add => handle_arithmetic(
@@ -43,6 +51,9 @@ impl Simulator {
 impl Display for Simulator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.registers)?;
+        if self.log_ip {
+            writeln!(f, "      ip: {:#06x} ({})", self.ip, self.ip)?;
+        }
         write!(f, "{}", self.flags)
     }
 }
@@ -55,7 +66,8 @@ mod tests {
 
     #[test]
     fn simulator_move_immediate_to_register() {
-        let mov = Inst::with_operands_v2(Operation::Mov, Register::BX, Data::U16(256));
+        let mut mov = Inst::with_operands_v2(Operation::Mov, Register::BX, Data::U16(256));
+        mov.set_size(3);
         let mut simulator = Simulator::default();
         simulator.exec(&mov);
         assert_eq!(simulator.registers.get(Register::BX), Data::U16(256));

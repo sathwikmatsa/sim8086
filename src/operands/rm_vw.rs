@@ -2,6 +2,7 @@ use crate::{
     disasm::{WithRMField, WithVField, WithWideField},
     fields::{Data, Operation, Register},
     instruction::{Inst, InstructionDecoder},
+    ByteStream,
 };
 
 #[derive(Default)]
@@ -19,12 +20,7 @@ impl WithVField for RMVW {
 }
 
 impl InstructionDecoder for RMVW {
-    fn decode(
-        &self,
-        first_byte: u8,
-        byte_stream: &mut std::iter::Peekable<std::slice::Iter<'_, u8>>,
-        op: Operation,
-    ) -> Inst {
+    fn decode(&self, first_byte: u8, byte_stream: &mut ByteStream, op: Operation) -> Inst {
         let second_byte = byte_stream
             .next()
             .expect("extract second instruction byte")
@@ -55,7 +51,11 @@ mod tests {
     fn one() {
         let bytes: [u8; 2] = [0b11010001, 0b11100011];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::SHL),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::SHL
+            ),
             Inst::with_operands(
                 Operation::SHL,
                 Operand::Register(Register::BX),
@@ -68,7 +68,11 @@ mod tests {
     fn cl() {
         let bytes: [u8; 2] = [0b11010011, 0b11100011];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::SHL),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::SHL
+            ),
             Inst::with_operands(
                 Operation::SHL,
                 Operand::Register(Register::BX),

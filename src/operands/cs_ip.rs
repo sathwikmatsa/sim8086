@@ -2,6 +2,7 @@ use crate::{
     disasm::WithCsIp,
     fields::Operation,
     instruction::{Inst, InstructionDecoder},
+    ByteStream,
 };
 
 #[derive(Default)]
@@ -10,12 +11,7 @@ pub struct CsIp;
 impl WithCsIp for CsIp {}
 
 impl InstructionDecoder for CsIp {
-    fn decode(
-        &self,
-        _first_byte: u8,
-        byte_stream: &mut std::iter::Peekable<std::slice::Iter<'_, u8>>,
-        op: Operation,
-    ) -> Inst {
+    fn decode(&self, _first_byte: u8, byte_stream: &mut ByteStream, op: Operation) -> Inst {
         let cs_ip = Self::extract_cs_ip(byte_stream).into();
         Inst::with_operand(op, cs_ip)
     }
@@ -33,7 +29,11 @@ mod tests {
     fn call() {
         let bytes: [u8; 5] = [0b10011010, 0b11001000, 0b00000001, 0b01111011, 0b00000000];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Call),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Call
+            ),
             Inst::with_operand(
                 Operation::Call,
                 Operand::CsIp(CsIpField {

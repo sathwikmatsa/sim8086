@@ -2,6 +2,7 @@ use crate::{
     disasm::{WithRMField, WithWideField},
     fields::Operation,
     instruction::{Inst, InstructionDecoder},
+    ByteStream,
 };
 
 #[derive(Default)]
@@ -15,12 +16,7 @@ impl WithWideField for RMW {
 }
 
 impl InstructionDecoder for RMW {
-    fn decode(
-        &self,
-        first_byte: u8,
-        byte_stream: &mut std::iter::Peekable<std::slice::Iter<'_, u8>>,
-        op: Operation,
-    ) -> Inst {
+    fn decode(&self, first_byte: u8, byte_stream: &mut ByteStream, op: Operation) -> Inst {
         let second_byte = byte_stream
             .next()
             .expect("extract second instruction byte")
@@ -42,7 +38,11 @@ mod tests {
     fn inc() {
         let bytes: [u8; 2] = [0b11111111, 0b11000011];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::INC),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::INC
+            ),
             Inst::with_operand(Operation::INC, Operand::Register(Register::BX))
         )
     }

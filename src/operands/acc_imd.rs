@@ -2,6 +2,7 @@ use crate::{
     disasm::{WithData, WithWideField},
     fields::{Operation, Register},
     instruction::{Inst, InstructionDecoder},
+    ByteStream,
 };
 
 #[derive(Default)]
@@ -14,12 +15,7 @@ impl WithWideField for AccImd {
 impl WithData for AccImd {}
 
 impl InstructionDecoder for AccImd {
-    fn decode(
-        &self,
-        first_byte: u8,
-        byte_stream: &mut std::iter::Peekable<std::slice::Iter<'_, u8>>,
-        op: Operation,
-    ) -> Inst {
+    fn decode(&self, first_byte: u8, byte_stream: &mut ByteStream, op: Operation) -> Inst {
         let wide = Self::is_wide(first_byte);
         let data = Self::extract_data(first_byte, byte_stream).into();
         let acc = if wide { Register::AX } else { Register::AL }.into();
@@ -39,7 +35,11 @@ mod tests {
     fn not_wide() {
         let bytes: [u8; 2] = [0b00111100, 0b00000001];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Cmp),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Cmp
+            ),
             Inst::with_operands(
                 Operation::Cmp,
                 Operand::Register(Register::AL),
@@ -52,7 +52,11 @@ mod tests {
     fn wide() {
         let bytes: [u8; 3] = [0b00111101, 0b00000001, 0b00000001];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Cmp),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Cmp
+            ),
             Inst::with_operands(
                 Operation::Cmp,
                 Operand::Register(Register::AX),

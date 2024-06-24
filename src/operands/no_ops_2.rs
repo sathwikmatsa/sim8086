@@ -1,18 +1,14 @@
 use crate::{
     fields::Operation,
     instruction::{Inst, InstructionDecoder},
+    ByteStream,
 };
 
 #[derive(Default)]
 pub struct NoOps2;
 
 impl InstructionDecoder for NoOps2 {
-    fn decode(
-        &self,
-        _first_byte: u8,
-        byte_stream: &mut std::iter::Peekable<std::slice::Iter<u8>>,
-        op: Operation,
-    ) -> Inst {
+    fn decode(&self, _first_byte: u8, byte_stream: &mut ByteStream, op: Operation) -> Inst {
         byte_stream.next();
         Inst::new(op)
     }
@@ -27,7 +23,7 @@ mod tests {
     #[test]
     fn aam() {
         let bytes: [u8; 2] = [0b11010100, 0b00001010];
-        let mut stream = bytes[1..].iter().peekable();
+        let mut stream = ByteStream::new(bytes[1..].iter());
         assert_eq!(
             DECODER.decode(bytes[0], &mut stream, Operation::AAM),
             Inst::new(Operation::AAM)

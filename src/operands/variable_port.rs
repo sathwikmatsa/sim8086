@@ -2,6 +2,7 @@ use crate::{
     disasm::WithWideField,
     fields::{Operand, Operation, Register},
     instruction::{Inst, InstructionDecoder},
+    ByteStream,
 };
 
 #[derive(Default)]
@@ -12,12 +13,7 @@ impl WithWideField for VariablePort {
 }
 
 impl InstructionDecoder for VariablePort {
-    fn decode(
-        &self,
-        first_byte: u8,
-        _byte_stream: &mut std::iter::Peekable<std::slice::Iter<u8>>,
-        op: Operation,
-    ) -> Inst {
+    fn decode(&self, first_byte: u8, _byte_stream: &mut ByteStream, op: Operation) -> Inst {
         let wide = Self::is_wide(first_byte);
         let acc = if wide { Register::AX } else { Register::AL }.into();
         let dx = Operand::Register(Register::DX);
@@ -39,7 +35,11 @@ mod tests {
     fn wide() {
         let bytes: [u8; 1] = [0b11101101];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::IN),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::IN
+            ),
             Inst::with_operands(
                 Operation::IN,
                 Operand::Register(Register::AX),
@@ -52,7 +52,11 @@ mod tests {
     fn not_wide() {
         let bytes: [u8; 1] = [0b11101110];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::OUT),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::OUT
+            ),
             Inst::with_operands(
                 Operation::OUT,
                 Operand::Register(Register::DX),

@@ -2,6 +2,7 @@ use crate::{
     disasm::{WithDestField, WithRMField, WithSR, WithWideField},
     fields::Operation,
     instruction::{Inst, InstructionDecoder},
+    ByteStream,
 };
 
 #[derive(Default)]
@@ -24,12 +25,7 @@ impl WithDestField for SRRM {
 }
 
 impl InstructionDecoder for SRRM {
-    fn decode(
-        &self,
-        first_byte: u8,
-        byte_stream: &mut std::iter::Peekable<std::slice::Iter<'_, u8>>,
-        op: Operation,
-    ) -> Inst {
+    fn decode(&self, first_byte: u8, byte_stream: &mut ByteStream, op: Operation) -> Inst {
         let second_byte = byte_stream
             .next()
             .expect("extract second instruction byte")
@@ -57,7 +53,11 @@ mod tests {
     fn reg_to_sr() {
         let bytes: [u8; 2] = [0b10001110, 0b11000011];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Mov
+            ),
             Inst::with_operands(
                 Operation::Mov,
                 Operand::SR(SegmentRegister::ES),
@@ -70,7 +70,11 @@ mod tests {
     fn sr_to_reg() {
         let bytes: [u8; 2] = [0b10001100, 0b11000011];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Mov
+            ),
             Inst::with_operands(
                 Operation::Mov,
                 Operand::Register(Register::BX),

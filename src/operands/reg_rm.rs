@@ -2,6 +2,7 @@ use crate::{
     disasm::{WithDestField, WithRMField, WithRegField, WithWideField},
     fields::Operation,
     instruction::{Inst, InstructionDecoder},
+    ByteStream,
 };
 
 #[derive(Default)]
@@ -22,12 +23,7 @@ impl WithWideField for RegRM {
 }
 
 impl InstructionDecoder for RegRM {
-    fn decode(
-        &self,
-        first_byte: u8,
-        byte_stream: &mut std::iter::Peekable<std::slice::Iter<'_, u8>>,
-        op: Operation,
-    ) -> Inst {
+    fn decode(&self, first_byte: u8, byte_stream: &mut ByteStream, op: Operation) -> Inst {
         let second_byte = byte_stream
             .next()
             .expect("extract second instruction byte")
@@ -55,7 +51,11 @@ mod tests {
     fn reg_to_reg_wide() {
         let bytes: [u8; 2] = [0b10001001, 0b11000011];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Mov
+            ),
             Inst::with_operands(
                 Operation::Mov,
                 Operand::Register(Register::BX),
@@ -68,7 +68,11 @@ mod tests {
     fn reg_to_reg_not_wide() {
         let bytes: [u8; 2] = [0b10001000, 0b11000011];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Mov
+            ),
             Inst::with_operands(
                 Operation::Mov,
                 Operand::Register(Register::BL),
@@ -81,7 +85,11 @@ mod tests {
     fn reg_to_mem_no_disp() {
         let bytes: [u8; 2] = [0b10001000, 0b00010011];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Mov
+            ),
             Inst::with_operands(
                 Operation::Mov,
                 Operand::EffectiveAddress(EffectiveAddress::BP_DI(None, Wide::Byte)),
@@ -94,7 +102,11 @@ mod tests {
     fn reg_to_mem_direct_address() {
         let bytes: [u8; 4] = [0b10001001, 0b00010110, 0b00000001, 0b00000000];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Mov
+            ),
             Inst::with_operands(
                 Operation::Mov,
                 Operand::EffectiveAddress(EffectiveAddress::DirectAddress(1, Wide::Word)),
@@ -107,7 +119,11 @@ mod tests {
     fn reg_to_mem_8bit_disp() {
         let bytes: [u8; 3] = [0b10001000, 0b01001110, 0b00000010];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Mov
+            ),
             Inst::with_operands(
                 Operation::Mov,
                 Operand::EffectiveAddress(EffectiveAddress::BP(2, Wide::Byte)),
@@ -120,7 +136,11 @@ mod tests {
     fn reg_to_mem_16bit_disp() {
         let bytes: [u8; 4] = [0b10001001, 0b10011000, 0b00000000, 0b00000001];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Mov
+            ),
             Inst::with_operands(
                 Operation::Mov,
                 Operand::EffectiveAddress(EffectiveAddress::BX_SI(Some(256), Wide::Word)),
@@ -133,7 +153,11 @@ mod tests {
     fn mem_16bit_disp_to_reg() {
         let bytes: [u8; 4] = [0b10001011, 0b10011000, 0b00000000, 0b00000001];
         assert_eq!(
-            DECODER.decode(bytes[0], &mut bytes[1..].iter().peekable(), Operation::Mov),
+            DECODER.decode(
+                bytes[0],
+                &mut ByteStream::new(bytes[1..].iter()),
+                Operation::Mov
+            ),
             Inst::with_operands(
                 Operation::Mov,
                 Operand::Register(Register::BX),

@@ -39,13 +39,13 @@ fn decode_test_fixture(name: &str) -> Vec<Inst> {
     instructions
 }
 
-fn sim_test_fixture(name: &str) -> String {
+fn sim_test_fixture(name: &str) -> Simulator {
     let instructions = decode_test_fixture(name);
     let mut simulator = Simulator::default();
     for inst in instructions {
         simulator.exec(&inst);
     }
-    simulator.to_string()
+    simulator
 }
 
 #[test]
@@ -75,7 +75,7 @@ fn completionist() {
 
 #[test]
 fn simulate_immediate_movs() {
-    let output = sim_test_fixture("listing_0043_immediate_movs");
+    let output = sim_test_fixture("listing_0043_immediate_movs").to_string();
     let expected = r#"Final registers:
       ax: 0x0001 (1)
       bx: 0x0002 (2)
@@ -90,7 +90,7 @@ fn simulate_immediate_movs() {
 
 #[test]
 fn simulate_register_movs() {
-    let output = sim_test_fixture("listing_0044_register_movs");
+    let output = sim_test_fixture("listing_0044_register_movs").to_string();
     let expected = r#"Final registers:
       ax: 0x0004 (4)
       bx: 0x0003 (3)
@@ -105,7 +105,7 @@ fn simulate_register_movs() {
 
 #[test]
 fn simulate_challenge_register_movs() {
-    let output = sim_test_fixture("listing_0045_challenge_register_movs");
+    let output = sim_test_fixture("listing_0045_challenge_register_movs").to_string();
     let expected = r#"Final registers:
       ax: 0x4411 (17425)
       bx: 0x3344 (13124)
@@ -123,7 +123,7 @@ fn simulate_challenge_register_movs() {
 
 #[test]
 fn simulate_add_sub_cmp() {
-    let output = sim_test_fixture("listing_0046_add_sub_cmp");
+    let output = sim_test_fixture("listing_0046_add_sub_cmp").to_string();
     let expected = r#"Final registers:
       bx: 0xe102 (57602)
       cx: 0x0f01 (3841)
@@ -131,14 +131,28 @@ fn simulate_add_sub_cmp() {
    flags: PZ"#;
     assert_eq!(output.trim(), expected);
 }
+
 #[test]
 fn simulate_challenge_flags() {
-    let output = sim_test_fixture("listing_0047_challenge_flags");
+    let output = sim_test_fixture("listing_0047_challenge_flags").to_string();
     let expected = r#"Final registers:
       bx: 0x9ca5 (40101)
       dx: 0x000a (10)
       sp: 0x0063 (99)
       bp: 0x0062 (98)
    flags: ACPS"#;
+    assert_eq!(output.trim(), expected);
+}
+
+#[test]
+fn simulate_ip_register() {
+    let mut sim = sim_test_fixture("listing_0048_ip_register");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      bx: 0x07d0 (2000)
+      cx: 0xfce0 (64736)
+      ip: 0x000e (14)
+   flags: CS"#;
     assert_eq!(output.trim(), expected);
 }
