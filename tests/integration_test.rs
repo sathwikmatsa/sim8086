@@ -155,3 +155,15 @@ fn simulate_ip_register() {
    flags: CS"#;
     assert_eq!(output.trim(), expected);
 }
+
+#[test]
+fn simulate_conditional_jumps() {
+    let mut sim = sim_test_fixture("listing_0049_conditional_jumps");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      bx: 0x0406 (1030)
+      ip: 0x000e (14)
+   flags: PZ"#;
+    assert_eq!(output.trim(), expected);
+}

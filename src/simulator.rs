@@ -3,7 +3,7 @@ use std::fmt::Display;
 use crate::{
     cpu::{Flags, Registers},
     disasm::Program,
-    fields::Operation,
+    fields::{Inc, Operation},
     handlers::*,
 };
 
@@ -44,6 +44,15 @@ impl Simulator {
                     &mut self.registers,
                     &mut self.flags,
                 ),
+                Operation::JNE => {
+                    if !self.flags.zero {
+                        let first = inst.first.expect("JNE has first operand");
+                        let inc: Inc = first.try_into().expect("JNE has Inc operand");
+                        let nbytes: i16 = inc.into();
+                        program.advance_by(nbytes);
+                        self.ip = self.ip.checked_add_signed(nbytes).unwrap();
+                    }
+                }
                 _ => unimplemented!(),
             }
         }

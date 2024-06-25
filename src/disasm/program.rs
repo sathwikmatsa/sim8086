@@ -41,6 +41,25 @@ impl Program {
         }
         instruction
     }
+
+    /// returns size of the previous instruction in bytes
+    fn go_back(&mut self) -> Option<usize> {
+        let instruction = self.instructions.get(self.ip - 1);
+        instruction.map(|i| {
+            self.ip -= 1;
+            i.size
+        })
+    }
+
+    pub fn advance_by(&mut self, mut nbytes: i16) {
+        while nbytes != 0 {
+            if nbytes.is_positive() {
+                nbytes -= self.next_instruction().expect("jmp within code range").size as i16;
+            } else {
+                nbytes += self.go_back().expect("jmp within code range") as i16;
+            }
+        }
+    }
 }
 
 impl TryFrom<Vec<Inst>> for Program {
