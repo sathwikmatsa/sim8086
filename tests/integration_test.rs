@@ -167,3 +167,16 @@ fn simulate_conditional_jumps() {
    flags: PZ"#;
     assert_eq!(output.trim(), expected);
 }
+
+#[test]
+fn simulate_challenge_jumps() {
+    let mut sim = sim_test_fixture("listing_0050_challenge_jumps");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      ax: 0x000d (13)
+      bx: 0xfffb (65531)
+      ip: 0x001c (28)
+   flags: ACS"#;
+    assert_eq!(output.trim(), expected);
+}

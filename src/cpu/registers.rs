@@ -46,6 +46,14 @@ impl GetSetBytes for u16 {
 }
 
 impl Registers {
+    pub fn dec_cx(&mut self) {
+        self.cx = self.cx.checked_sub(1).unwrap();
+    }
+
+    pub fn cx(&self) -> u16 {
+        self.cx
+    }
+
     pub fn set_reg(&mut self, to: Register, from: Register) {
         let imd = self.get(from);
         self.set_imd(to, imd);

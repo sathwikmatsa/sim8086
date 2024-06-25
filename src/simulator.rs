@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use crate::{
+    conditional_advance,
     cpu::{Flags, Registers},
     disasm::Program,
     fields::{Inc, Operation},
@@ -45,13 +46,21 @@ impl Simulator {
                     &mut self.flags,
                 ),
                 Operation::JNE => {
-                    if !self.flags.zero {
-                        let first = inst.first.expect("JNE has first operand");
-                        let inc: Inc = first.try_into().expect("JNE has Inc operand");
-                        let nbytes: i16 = inc.into();
-                        program.advance_by(nbytes);
-                        self.ip = self.ip.checked_add_signed(nbytes).unwrap();
-                    }
+                    conditional_advance!(!self.flags.zero, "JNE", self, inst, program)
+                }
+                Operation::JE => {
+                    conditional_advance!(self.flags.zero, "JE", self, inst, program)
+                }
+                Operation::JB => {
+                    conditional_advance!(self.flags.carry, "JB", self, inst, program)
+                }
+                Operation::JP => {
+                    conditional_advance!(self.flags.parity, "JP", self, inst, program)
+                }
+                Operation::LOOPNZ => {
+                    self.registers.dec_cx();
+                    let cond = self.registers.cx() != 0 && !self.flags.zero;
+                    conditional_advance!(cond, "LOOPNZ", self, inst, program)
                 }
                 _ => unimplemented!(),
             }
