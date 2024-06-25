@@ -2,9 +2,9 @@ use std::fmt::Display;
 
 use crate::{
     cpu::{Flags, Registers},
+    disasm::Program,
     fields::Operation,
     handlers::*,
-    instruction::Inst,
 };
 
 #[derive(Default)]
@@ -20,30 +20,32 @@ impl Simulator {
         self.log_ip = true;
     }
 
-    pub fn exec(&mut self, inst: &Inst) {
-        self.ip += inst.size().expect("size is set in decoder phase") as u16;
+    pub fn exec(&mut self, program: &mut Program) {
+        while let Some(inst) = program.next_instruction() {
+            self.ip += inst.size as u16;
 
-        match inst.operation {
-            Operation::Mov => handle_mov(inst, &mut self.registers),
-            Operation::Add => handle_arithmetic(
-                ArithmeticOp::Add,
-                inst,
-                &mut self.registers,
-                &mut self.flags,
-            ),
-            Operation::Sub => handle_arithmetic(
-                ArithmeticOp::Sub,
-                inst,
-                &mut self.registers,
-                &mut self.flags,
-            ),
-            Operation::Cmp => handle_arithmetic(
-                ArithmeticOp::Cmp,
-                inst,
-                &mut self.registers,
-                &mut self.flags,
-            ),
-            _ => unimplemented!(),
+            match inst.operation {
+                Operation::Mov => handle_mov(inst, &mut self.registers),
+                Operation::Add => handle_arithmetic(
+                    ArithmeticOp::Add,
+                    inst,
+                    &mut self.registers,
+                    &mut self.flags,
+                ),
+                Operation::Sub => handle_arithmetic(
+                    ArithmeticOp::Sub,
+                    inst,
+                    &mut self.registers,
+                    &mut self.flags,
+                ),
+                Operation::Cmp => handle_arithmetic(
+                    ArithmeticOp::Cmp,
+                    inst,
+                    &mut self.registers,
+                    &mut self.flags,
+                ),
+                _ => unimplemented!(),
+            }
         }
     }
 }
@@ -60,7 +62,10 @@ impl Display for Simulator {
 
 #[cfg(test)]
 mod tests {
-    use crate::fields::{Data, Register};
+    use crate::{
+        fields::{Data, Register},
+        instruction::Inst,
+    };
 
     use super::*;
 
@@ -69,7 +74,8 @@ mod tests {
         let mut mov = Inst::with_operands_v2(Operation::Mov, Register::BX, Data::U16(256));
         mov.set_size(3);
         let mut simulator = Simulator::default();
-        simulator.exec(&mov);
+        let mut program = vec![mov].try_into().unwrap();
+        simulator.exec(&mut program);
         assert_eq!(simulator.registers.get(Register::BX), Data::U16(256));
     }
 }

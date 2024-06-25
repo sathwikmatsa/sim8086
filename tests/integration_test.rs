@@ -42,9 +42,8 @@ fn decode_test_fixture(name: &str) -> Vec<Inst> {
 fn sim_test_fixture(name: &str) -> Simulator {
     let instructions = decode_test_fixture(name);
     let mut simulator = Simulator::default();
-    for inst in instructions {
-        simulator.exec(&inst);
-    }
+    let mut program = instructions.try_into().expect("decoded properly");
+    simulator.exec(&mut program);
     simulator
 }
 

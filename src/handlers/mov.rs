@@ -1,6 +1,6 @@
-use crate::{cpu::Registers, fields::Operand, instruction::Inst};
+use crate::{cpu::Registers, disasm::Instruction, fields::Operand};
 
-pub fn handle_mov(inst: &Inst, registers: &mut Registers) {
+pub fn handle_mov(inst: &Instruction, registers: &mut Registers) {
     let first = inst.first.expect("mov has first operand");
     let second = inst.second.expect("mov has second operand");
 
@@ -21,7 +21,13 @@ mod tests {
 
     #[test]
     fn move_immediate_to_register() {
-        let inst = Inst::with_operands_v2(Operation::Mov, Register::BX, Data::U16(256));
+        let inst = Instruction {
+            operation: Operation::Mov,
+            first: Some(Register::BX.into()),
+            second: Some(Data::U16(256).into()),
+            prefix: None,
+            size: 4,
+        };
         let mut registers = Registers::default();
         handle_mov(&inst, &mut registers);
         assert_eq!(registers.get(Register::BX), Data::U16(256));

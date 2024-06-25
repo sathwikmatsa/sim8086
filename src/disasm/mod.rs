@@ -1,7 +1,9 @@
 mod decoder;
 mod extractors;
+mod program;
 
 pub use extractors::*;
+pub use program::*;
 
 use std::io::{self, Write};
 

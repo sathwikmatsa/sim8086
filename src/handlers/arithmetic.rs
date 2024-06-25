@@ -2,8 +2,8 @@ use enum_stringify::EnumStringify;
 
 use crate::{
     cpu::{Flags, Registers},
+    disasm::Instruction,
     fields::{Data, DataWithCarry, Operand},
-    instruction::Inst,
 };
 
 #[derive(EnumStringify, PartialEq)]
@@ -26,7 +26,7 @@ impl ArithmeticOp {
 
 pub fn handle_arithmetic(
     op: ArithmeticOp,
-    inst: &Inst,
+    inst: &Instruction,
     registers: &mut Registers,
     flags: &mut Flags,
 ) {
