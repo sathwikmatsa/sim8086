@@ -66,7 +66,12 @@ impl Simulator {
                     let cond = self.registers.cx() != 0 && !self.flags.zero;
                     conditional_advance!(cond, "LOOPNZ", self, inst, program)
                 }
-                _ => unimplemented!(),
+                Operation::LOOP => {
+                    self.registers.dec_cx();
+                    let cond = self.registers.cx() != 0;
+                    conditional_advance!(cond, "LOOP", self, inst, program)
+                }
+                _ => unimplemented!("{:?}", inst),
             }
         }
     }

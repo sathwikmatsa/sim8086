@@ -240,3 +240,17 @@ fn draw_rectangle() {
     sim.dump_memory(File::create("draw_rectangle.data").unwrap())
         .unwrap();
 }
+
+#[test]
+fn challenge_rectangle() {
+    let mut sim = sim_test_fixture("listing_0055_challenge_rectangle");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      bx: 0x4004 (16388)
+      bp: 0x02fc (764)
+      ip: 0x0044 (68)"#;
+    assert_eq!(output.trim(), expected);
+    sim.dump_memory(File::create("challenge_rectangle.data").unwrap())
+        .unwrap();
+}

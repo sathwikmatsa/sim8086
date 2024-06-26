@@ -28,12 +28,13 @@ pub fn handle_mov(inst: &Instruction, registers: &mut Registers, memory: &mut Me
             registers.set_imd(reg, Data::U16(imd));
         }
         (Operand::EffectiveAddress(ea), Operand::Register(reg)) => {
-            if ea.wide() == Wide::Byte {
-                unimplemented!()
-            }
-            let val: u16 = registers.get(reg).into();
+            let data = registers.get(reg);
             let addr = registers.calculate_eff_addr(ea);
-            memory.store_16(addr, val);
+            match ea.wide() {
+                Wide::Byte => memory.store_8(addr, (&data).try_into().expect("8bit data")),
+                Wide::Word => memory.store_16(addr, data.into()),
+                _ => unreachable!(),
+            }
         }
         _ => unimplemented!("{:?}", inst),
     }
