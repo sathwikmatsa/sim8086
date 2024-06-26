@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::fields::{Data, Register, SegmentRegister};
+use crate::fields::{Data, EffectiveAddress, Register, SegmentRegister};
 
 #[derive(Default)]
 pub struct Registers {
@@ -142,6 +142,15 @@ impl Registers {
             Register::DH => self
                 .dx
                 .set_high(u8::try_from(&imd).expect("u8 for 8bit registers")),
+        }
+    }
+
+    pub fn calculate_eff_addr(&self, ea: EffectiveAddress) -> u16 {
+        match ea {
+            EffectiveAddress::DirectAddress(addr, _) => addr,
+            EffectiveAddress::BX(disp, _) => self.bx + disp.unwrap_or(0),
+            EffectiveAddress::BP_SI(disp, _) => self.bp + self.si + disp.unwrap_or(0),
+            _ => unimplemented!("{:?}", ea),
         }
     }
 }

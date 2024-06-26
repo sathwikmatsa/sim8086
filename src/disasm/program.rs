@@ -3,6 +3,7 @@ use crate::{
     instruction::{Inst, InstructionPrefix},
 };
 
+#[derive(Debug)]
 pub struct Instruction {
     pub operation: Operation,
     pub first: Option<Operand>,

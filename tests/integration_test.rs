@@ -194,3 +194,19 @@ fn simulate_memory_mov() {
       ip: 0x0030 (48)"#;
     assert_eq!(output.trim(), expected);
 }
+
+#[test]
+fn simulate_memory_add_loop() {
+    let mut sim = sim_test_fixture("listing_0052_memory_add_loop");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      bx: 0x0006 (6)
+      cx: 0x0004 (4)
+      dx: 0x0006 (6)
+      bp: 0x03e8 (1000)
+      si: 0x0006 (6)
+      ip: 0x0023 (35)
+   flags: PZ"#;
+    assert_eq!(output.trim(), expected);
+}

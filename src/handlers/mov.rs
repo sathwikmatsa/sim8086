@@ -1,7 +1,7 @@
 use crate::{
     cpu::{Memory, Registers},
     disasm::Instruction,
-    fields::{Data, EffectiveAddress, Operand, Register, Wide},
+    fields::{Data, Operand, Wide},
 };
 
 pub fn handle_mov(inst: &Instruction, registers: &mut Registers, memory: &mut Memory) {
@@ -13,23 +13,26 @@ pub fn handle_mov(inst: &Instruction, registers: &mut Registers, memory: &mut Me
         (Operand::Register(reg1), Operand::Register(reg2)) => registers.set_reg(reg1, reg2),
         (Operand::Register(reg), Operand::SR(sr)) => registers.set_reg_from_sr(reg, sr),
         (Operand::SR(sr), Operand::Register(reg)) => registers.set_sr_from_reg(sr, reg),
-        (Operand::EffectiveAddress(addr), Operand::Immediate(imd)) => match addr {
-            EffectiveAddress::DirectAddress(da, Wide::Word) => memory.store_16(da, imd.into()),
-            EffectiveAddress::BX(Some(disp), Wide::Word) => {
-                let bx: u16 = registers.get(Register::BX).into();
-                let addr = bx + disp;
-                memory.store_16(addr, imd.into());
+        (Operand::EffectiveAddress(addr), Operand::Immediate(Data::U16(imd))) => {
+            memory.store_16(registers.calculate_eff_addr(addr), imd);
+        }
+        (Operand::Register(reg), Operand::EffectiveAddress(ea)) => {
+            if ea.wide() == Wide::Byte {
+                unimplemented!()
             }
-            _ => unimplemented!(),
-        },
-        (Operand::Register(reg), Operand::EffectiveAddress(addr)) => match addr {
-            EffectiveAddress::DirectAddress(da, Wide::Word) => {
-                let mem = memory.load_16(da);
-                registers.set_imd(reg, Data::U16(mem));
+            let addr = registers.calculate_eff_addr(ea);
+            let imd = memory.load_16(addr);
+            registers.set_imd(reg, Data::U16(imd));
+        }
+        (Operand::EffectiveAddress(ea), Operand::Register(reg)) => {
+            if ea.wide() == Wide::Byte {
+                unimplemented!()
             }
-            _ => unimplemented!(),
-        },
-        _ => unimplemented!(),
+            let val: u16 = registers.get(reg).into();
+            let addr = registers.calculate_eff_addr(ea);
+            memory.store_16(addr, val);
+        }
+        _ => unimplemented!("{:?}", inst),
     }
 }
 
