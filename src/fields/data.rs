@@ -9,6 +9,15 @@ pub enum Data {
     U16(u16),
 }
 
+impl Data {
+    fn to_u16(self) -> u16 {
+        match self {
+            Data::U8(x) => x as u16,
+            Data::U16(x) => x,
+        }
+    }
+}
+
 pub struct Carry(pub bool);
 pub struct HalfCarry(pub bool);
 pub struct DataWithCarry(pub Data, pub Carry, pub HalfCarry);
@@ -78,12 +87,15 @@ impl From<Data> for Operand {
     }
 }
 
+impl From<Data> for u16 {
+    fn from(data: Data) -> Self {
+        data.to_u16()
+    }
+}
+
 impl From<&Data> for u16 {
     fn from(data: &Data) -> Self {
-        match data {
-            Data::U8(value) => value.to_owned() as u16,
-            Data::U16(value) => value.to_owned(),
-        }
+        data.to_u16()
     }
 }
 

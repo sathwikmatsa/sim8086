@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use crate::{
     conditional_advance,
-    cpu::{Flags, Registers},
+    cpu::{Flags, Memory, Registers},
     disasm::Program,
     fields::{Inc, Operation},
     handlers::*,
@@ -14,6 +14,7 @@ pub struct Simulator {
     pub flags: Flags,
     pub ip: u16,
     log_ip: bool,
+    pub memory: Memory,
 }
 
 impl Simulator {
@@ -26,7 +27,7 @@ impl Simulator {
             self.ip += inst.size as u16;
 
             match inst.operation {
-                Operation::Mov => handle_mov(inst, &mut self.registers),
+                Operation::Mov => handle_mov(inst, &mut self.registers, &mut self.memory),
                 Operation::Add => handle_arithmetic(
                     ArithmeticOp::Add,
                     inst,

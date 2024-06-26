@@ -180,3 +180,17 @@ fn simulate_challenge_jumps() {
    flags: ACS"#;
     assert_eq!(output.trim(), expected);
 }
+
+#[test]
+fn simulate_memory_mov() {
+    let mut sim = sim_test_fixture("listing_0051_memory_mov");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      bx: 0x0001 (1)
+      cx: 0x0002 (2)
+      dx: 0x000a (10)
+      bp: 0x0004 (4)
+      ip: 0x0030 (48)"#;
+    assert_eq!(output.trim(), expected);
+}
