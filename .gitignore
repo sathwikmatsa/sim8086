@@ -1,3 +1,4 @@
+*.data
 *.pdf
 /target
 /tests/artifacts/*

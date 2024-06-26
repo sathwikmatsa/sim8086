@@ -16,6 +16,9 @@ pub fn handle_mov(inst: &Instruction, registers: &mut Registers, memory: &mut Me
         (Operand::EffectiveAddress(addr), Operand::Immediate(Data::U16(imd))) => {
             memory.store_16(registers.calculate_eff_addr(addr), imd);
         }
+        (Operand::EffectiveAddress(addr), Operand::Immediate(Data::U8(imd))) => {
+            memory.store_8(registers.calculate_eff_addr(addr), imd);
+        }
         (Operand::Register(reg), Operand::EffectiveAddress(ea)) => {
             if ea.wide() == Wide::Byte {
                 unimplemented!()

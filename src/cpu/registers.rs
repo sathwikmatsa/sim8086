@@ -150,6 +150,7 @@ impl Registers {
             EffectiveAddress::DirectAddress(addr, _) => addr,
             EffectiveAddress::BX(disp, _) => self.bx + disp.unwrap_or(0),
             EffectiveAddress::BP_SI(disp, _) => self.bp + self.si + disp.unwrap_or(0),
+            EffectiveAddress::BP(disp, _) => self.bp + disp,
             _ => unimplemented!("{:?}", ea),
         }
     }

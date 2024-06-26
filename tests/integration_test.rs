@@ -224,3 +224,19 @@ fn simulate_memory_add_loop_challenge() {
    flags: PZ"#;
     assert_eq!(output.trim(), expected);
 }
+
+#[test]
+fn draw_rectangle() {
+    let mut sim = sim_test_fixture("listing_0054_draw_rectangle");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      cx: 0x0040 (64)
+      dx: 0x0040 (64)
+      bp: 0x4000 (16384)
+      ip: 0x0026 (38)
+   flags: PZ"#;
+    assert_eq!(output.trim(), expected);
+    sim.dump_memory(File::create("draw_rectangle.data").unwrap())
+        .unwrap();
+}

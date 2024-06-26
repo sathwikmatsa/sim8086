@@ -70,6 +70,10 @@ impl Simulator {
             }
         }
     }
+
+    pub fn dump_memory(&self, mut f: impl std::io::Write) -> Result<(), std::io::Error> {
+        f.write_all(self.memory.raw())
+    }
 }
 
 impl Display for Simulator {
