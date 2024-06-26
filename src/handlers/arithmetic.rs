@@ -1,9 +1,9 @@
 use enum_stringify::EnumStringify;
 
 use crate::{
-    cpu::{Flags, Registers},
+    cpu::{Flags, Memory, Registers},
     disasm::Instruction,
-    fields::{Data, DataWithCarry, Operand},
+    fields::{Data, DataWithCarry, Operand, Wide},
 };
 
 #[derive(EnumStringify, PartialEq)]
@@ -29,6 +29,7 @@ pub fn handle_arithmetic(
     inst: &Instruction,
     registers: &mut Registers,
     flags: &mut Flags,
+    memory: &mut Memory,
 ) {
     let first = inst
         .first
@@ -52,6 +53,19 @@ pub fn handle_arithmetic(
             let newval = op.compute(lhs, rhs);
             if op != ArithmeticOp::Cmp {
                 registers.set_imd(reg1, newval.0);
+            }
+            flags.set(lhs, rhs, op, newval);
+        }
+        (Operand::Register(reg), Operand::EffectiveAddress(ea)) => {
+            if ea.wide() == Wide::Byte {
+                unimplemented!()
+            }
+            let addr = registers.calculate_eff_addr(ea);
+            let rhs = Data::U16(memory.load_16(addr));
+            let lhs = registers.get(reg);
+            let newval = op.compute(lhs, rhs);
+            if op != ArithmeticOp::Cmp {
+                registers.set_imd(reg, newval.0);
             }
             flags.set(lhs, rhs, op, newval);
         }

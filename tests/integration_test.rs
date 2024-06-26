@@ -210,3 +210,17 @@ fn simulate_memory_add_loop() {
    flags: PZ"#;
     assert_eq!(output.trim(), expected);
 }
+
+#[test]
+fn simulate_memory_add_loop_challenge() {
+    let mut sim = sim_test_fixture("listing_0053_add_loop_challenge");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      bx: 0x0006 (6)
+      dx: 0x0006 (6)
+      bp: 0x03e6 (998)
+      ip: 0x0021 (33)
+   flags: PZ"#;
+    assert_eq!(output.trim(), expected);
+}

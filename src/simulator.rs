@@ -33,18 +33,21 @@ impl Simulator {
                     inst,
                     &mut self.registers,
                     &mut self.flags,
+                    &mut self.memory,
                 ),
                 Operation::Sub => handle_arithmetic(
                     ArithmeticOp::Sub,
                     inst,
                     &mut self.registers,
                     &mut self.flags,
+                    &mut self.memory,
                 ),
                 Operation::Cmp => handle_arithmetic(
                     ArithmeticOp::Cmp,
                     inst,
                     &mut self.registers,
                     &mut self.flags,
+                    &mut self.memory,
                 ),
                 Operation::JNE => {
                     conditional_advance!(!self.flags.zero, "JNE", self, inst, program)
