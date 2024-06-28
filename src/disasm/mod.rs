@@ -23,8 +23,8 @@ fn join_prefix(prev: InstructionPrefix, curr: InstructionPrefix) -> InstructionP
     }
 }
 
-pub fn decode_8086(byte_stream: &[u8]) -> Vec<Inst> {
-    let mut byte_stream = ByteStream::new(byte_stream.iter());
+pub fn decode_8086(byte_stream_raw: &[u8]) -> Vec<Inst> {
+    let mut byte_stream = ByteStream::new(byte_stream_raw.iter());
     let mut instructions: Vec<Inst> = Vec::new();
     let mut first_instruction_byte = byte_stream.next_with_index();
     let mut inst_prefix: Option<InstructionPrefix> = None;
@@ -56,7 +56,7 @@ pub fn decode_8086(byte_stream: &[u8]) -> Vec<Inst> {
         }
         first_instruction_byte = byte_stream.next_with_index();
     }
-    if start_idx != 0 {
+    if start_idx != 0 || !byte_stream_raw.is_empty() {
         instructions
             .last_mut()
             .expect("atleast one instruction is decoded")

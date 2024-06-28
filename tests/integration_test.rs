@@ -47,6 +47,15 @@ fn sim_test_fixture(name: &str) -> Simulator {
     simulator
 }
 
+fn sim_test_fixture_with_clock_estimation(name: &str) -> Simulator {
+    let instructions = decode_test_fixture(name);
+    let mut simulator = Simulator::default();
+    simulator.enable_cycle_estimation();
+    let mut program = instructions.try_into().expect("decoded properly");
+    simulator.exec(&mut program);
+    simulator
+}
+
 #[test]
 fn more_movs() {
     decode_test_fixture("listing_39");
@@ -253,4 +262,21 @@ fn challenge_rectangle() {
     assert_eq!(output.trim(), expected);
     sim.dump_memory(File::create("challenge_rectangle.data").unwrap())
         .unwrap();
+}
+
+#[test]
+fn estimating_cycles() {
+    let mut sim = sim_test_fixture_with_clock_estimation("listing_0056_estimating_cycles");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      bx: 0x03e8 (1000)
+      dx: 0x0032 (50)
+      bp: 0x07d0 (2000)
+      si: 0x0bb8 (3000)
+      di: 0x0fa0 (4000)
+      ip: 0x0037 (55)"#;
+    assert_eq!(output.trim(), expected);
+    assert_eq!(sim.clocks_8086(), 192);
+    assert_eq!(sim.clocks_8088(), 236);
 }

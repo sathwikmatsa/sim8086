@@ -57,6 +57,28 @@ impl EffectiveAddress {
             Self::BX(_, x) => *x,
         }
     }
+
+    pub fn clocks(&self) -> usize {
+        match self {
+            Self::DirectAddress(_, _) => 6,
+            Self::SI(None, _) => 5,
+            Self::DI(None, _) => 5,
+            Self::BP(0, _) => 5,
+            Self::BX(None, _) => 5,
+            Self::SI(Some(_), _) => 9,
+            Self::DI(Some(_), _) => 9,
+            Self::BP(_, _) => 9,
+            Self::BX(Some(_), _) => 9,
+            Self::BP_DI(None, _) => 7,
+            Self::BX_SI(None, _) => 7,
+            Self::BP_SI(None, _) => 8,
+            Self::BX_DI(None, _) => 8,
+            Self::BP_DI(Some(_), _) => 11,
+            Self::BX_SI(Some(_), _) => 11,
+            Self::BP_SI(Some(_), _) => 12,
+            Self::BX_DI(Some(_), _) => 12,
+        }
+    }
 }
 
 impl From<EffectiveAddress> for Operand {

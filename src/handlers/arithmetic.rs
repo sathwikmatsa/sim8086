@@ -69,6 +69,19 @@ pub fn handle_arithmetic(
             }
             flags.set(lhs, rhs, op, newval);
         }
-        _ => unimplemented!(),
+        (Operand::EffectiveAddress(ea), Operand::Register(reg)) => {
+            if ea.wide() == Wide::Byte {
+                unimplemented!()
+            }
+            let addr = registers.calculate_eff_addr(ea);
+            let lhs = Data::U16(memory.load_16(addr));
+            let rhs = registers.get(reg);
+            let newval = op.compute(lhs, rhs);
+            if op != ArithmeticOp::Cmp {
+                memory.store_16(addr, newval.0.into());
+            }
+            flags.set(lhs, rhs, op, newval);
+        }
+        _ => unimplemented!("{:?}", inst),
     }
 }

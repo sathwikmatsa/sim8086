@@ -2,9 +2,9 @@ use std::fmt::Display;
 
 use crate::{
     conditional_advance,
-    cpu::{Flags, Memory, Registers},
+    cpu::{Clocks8086, Clocks8088, Flags, Memory, Registers},
     disasm::Program,
-    fields::{Inc, Operation},
+    fields::{EffectiveAddress, Inc, Operation},
     handlers::*,
 };
 
@@ -14,6 +14,9 @@ pub struct Simulator {
     pub flags: Flags,
     pub ip: u16,
     log_ip: bool,
+    estimate_cycles: bool,
+    cycles_8086: Clocks8086,
+    cycles_8088: Clocks8088,
     pub memory: Memory,
 }
 
@@ -22,9 +25,29 @@ impl Simulator {
         self.log_ip = true;
     }
 
+    pub fn enable_cycle_estimation(&mut self) {
+        self.estimate_cycles = true;
+    }
+
+    pub fn clocks_8086(&self) -> usize {
+        self.cycles_8086.0
+    }
+
+    pub fn clocks_8088(&self) -> usize {
+        self.cycles_8088.0
+    }
+
     pub fn exec(&mut self, program: &mut Program) {
         while let Some(inst) = program.next_instruction() {
             self.ip += inst.size as u16;
+
+            if self.estimate_cycles {
+                let (clocks86, clocks88) = inst.clocks(|ea: EffectiveAddress| -> bool {
+                    self.registers.calculate_eff_addr(ea) % 2 != 0
+                });
+                self.cycles_8086 += clocks86;
+                self.cycles_8088 += clocks88;
+            }
 
             match inst.operation {
                 Operation::Mov => handle_mov(inst, &mut self.registers, &mut self.memory),
