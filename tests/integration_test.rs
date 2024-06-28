@@ -280,3 +280,20 @@ fn estimating_cycles() {
     assert_eq!(sim.clocks_8086(), 192);
     assert_eq!(sim.clocks_8088(), 236);
 }
+
+#[test]
+fn challenge_cycles() {
+    let mut sim = sim_test_fixture_with_clock_estimation("listing_0057_challenge_cycles");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      bx: 0x03e8 (1000)
+      bp: 0x07d0 (2000)
+      si: 0x0bb8 (3000)
+      di: 0x0fa0 (4000)
+      ip: 0x0036 (54)
+   flags: A"#;
+    assert_eq!(output.trim(), expected);
+    assert_eq!(sim.clocks_8086(), 289);
+    assert_eq!(sim.clocks_8088(), 341);
+}
