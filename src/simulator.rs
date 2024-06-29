@@ -119,6 +119,20 @@ impl Simulator {
                     &mut self.flags,
                     &mut self.memory,
                 ),
+                Operation::DEC => handle_arithmetic(
+                    ArithmeticOp::Dec,
+                    inst,
+                    &mut self.registers,
+                    &mut self.flags,
+                    &mut self.memory,
+                ),
+                Operation::SHR => handle_logical(
+                    LogicalOp::Shr,
+                    inst,
+                    &mut self.registers,
+                    &mut self.flags,
+                    &mut self.memory,
+                ),
                 _ => unimplemented!("{:?}", inst),
             }
         }

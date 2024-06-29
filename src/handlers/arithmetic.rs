@@ -13,6 +13,7 @@ pub enum ArithmeticOp {
     Sub,
     Cmp,
     Inc,
+    Dec,
 }
 
 impl ArithmeticOp {
@@ -21,6 +22,12 @@ impl ArithmeticOp {
             Self::Add => lhs + rhs,
             Self::Inc => {
                 lhs + match lhs {
+                    Data::U16(_) => Data::U16(1),
+                    Data::U8(_) => Data::U8(1),
+                }
+            }
+            Self::Dec => {
+                lhs - match lhs {
                     Data::U16(_) => Data::U16(1),
                     Data::U8(_) => Data::U8(1),
                 }
@@ -44,7 +51,7 @@ pub fn handle_arithmetic(
     let second = inst
         .second
         .or({
-            if matches!(inst.operation, Operation::INC) {
+            if matches!(inst.operation, Operation::INC | Operation::DEC) {
                 // This is a dummy value. RHS is overriden based on first operand width in compute fn
                 Some(Operand::Immediate(Data::U16(1)))
             } else {

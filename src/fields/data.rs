@@ -113,6 +113,22 @@ impl ops::BitXor<Data> for Data {
     }
 }
 
+impl ops::Shr<Data> for Data {
+    type Output = Data;
+    fn shr(self, rhs: Data) -> Self::Output {
+        match self {
+            Self::U8(x) => match rhs {
+                Self::U8(y) => Data::U8(x >> y),
+                Self::U16(_) => unreachable!(),
+            },
+            Self::U16(x) => match rhs {
+                Self::U8(y) => Data::U16(x >> y),
+                Self::U16(_) => unreachable!(),
+            },
+        }
+    }
+}
+
 impl From<Data> for Operand {
     fn from(val: Data) -> Self {
         Operand::Immediate(val)

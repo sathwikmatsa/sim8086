@@ -11,6 +11,7 @@ use crate::{
 pub enum LogicalOp {
     Test,
     Xor,
+    Shr,
 }
 
 impl LogicalOp {
@@ -18,6 +19,7 @@ impl LogicalOp {
         match self {
             Self::Test => lhs & rhs,
             Self::Xor => lhs ^ rhs,
+            Self::Shr => lhs >> rhs,
         }
     }
 }
@@ -43,6 +45,14 @@ pub fn handle_logical(
             let newval = op.compute(lhs, rhs);
             if op != LogicalOp::Test {
                 registers.set_imd(reg1, newval);
+            }
+            flags.set_logical(newval);
+        }
+        (Operand::Register(reg), Operand::Immediate(rhs)) => {
+            let lhs = registers.get(reg);
+            let newval = op.compute(lhs, rhs);
+            if op != LogicalOp::Test {
+                registers.set_imd(reg, newval);
             }
             flags.set_logical(newval);
         }

@@ -140,15 +140,34 @@ impl Instruction {
                     _ => unimplemented!("{:?}", self),
                 }
             }
+            Operation::DEC => {
+                let first = self.first.expect("first operand exist for Dec op");
+                match first {
+                    Operand::Register(reg) => {
+                        let clocks = if reg.is_wide() { 2 } else { 3 };
+                        (Clocks8086(clocks), Clocks8088(clocks))
+                    }
+                    _ => unimplemented!("{:?}", self),
+                }
+            }
             Operation::Cmp => {
                 let first = self.first.expect("first operand exist for Cmp op");
                 let second = self.second.expect("second operand exist for Cmp op");
                 match (first, second) {
                     (Operand::Register(_), Operand::Register(_)) => (Clocks8086(3), Clocks8088(3)),
+                    (Operand::Register(_), Operand::Immediate(_)) => (Clocks8086(4), Clocks8088(4)),
                     _ => unimplemented!("{:?}", self),
                 }
             }
             Operation::Ret => (Clocks8086(8), Clocks8088(8)),
+            Operation::SHR => {
+                let first = self.first.expect("first operand exist for Shr op");
+                let second = self.second.expect("second operand exist for Shr op");
+                match (first, second) {
+                    (Operand::Register(_), Operand::Immediate(_)) => (Clocks8086(2), Clocks8088(2)),
+                    _ => unimplemented!("{:?}", self),
+                }
+            }
             _ => unimplemented!("{:?}", self),
         }
     }
