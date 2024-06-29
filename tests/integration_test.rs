@@ -314,3 +314,20 @@ fn single_scalar() {
     assert_eq!(output.trim(), expected);
     assert_eq!(sim.clocks_8086(), 463);
 }
+
+#[test]
+fn unroll2_scalar() {
+    let mut sim = sim_test_fixture_with_clock_estimation("listing_0060_Unroll2Scalar");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      ax: 0x00bf (191)
+      cx: 0x0008 (8)
+      bp: 0x03e8 (1000)
+      si: 0x0008 (8)
+      di: 0x0008 (8)
+      ip: 0x003c (60)
+   flags: PZ"#;
+    assert_eq!(output.trim(), expected);
+    assert_eq!(sim.clocks_8086(), 403);
+}

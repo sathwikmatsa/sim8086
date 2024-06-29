@@ -31,6 +31,7 @@ impl Instruction {
         match self.operation {
             Operation::JE => (JmpTakenClocks(16), JmpNotTakenClocks(4)),
             Operation::JNE => (JmpTakenClocks(16), JmpNotTakenClocks(4)),
+            Operation::JB => (JmpTakenClocks(16), JmpNotTakenClocks(4)),
             _ => unimplemented!("{:?}", self),
         }
     }
