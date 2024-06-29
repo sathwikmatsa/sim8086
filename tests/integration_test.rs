@@ -382,3 +382,17 @@ fn quad_scalar_ptr() {
     assert_eq!(output.trim(), expected);
     assert_eq!(sim.clocks_8086(), 357);
 }
+
+#[test]
+fn tree_scalar_ptr() {
+    let mut sim = sim_test_fixture_with_clock_estimation("listing_0064_TreeScalarPtr");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      ax: 0x00bf (191)
+      bp: 0x03f0 (1008)
+      ip: 0x0045 (69)
+   flags: PZ"#;
+    assert_eq!(output.trim(), expected);
+    assert_eq!(sim.clocks_8086(), 342);
+}
