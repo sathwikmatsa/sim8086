@@ -64,4 +64,13 @@ impl Flags {
 
         self.auxiliary = half_carry;
     }
+
+    pub fn set_logical(&mut self, value: Data) {
+        self.zero = value.is_zero();
+        self.parity = value.is_lower_byte_even_parity();
+        self.sign = value.is_signed();
+        self.carry = false;
+        self.overflow = false;
+        self.auxiliary = false;
+    }
 }

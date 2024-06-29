@@ -12,6 +12,15 @@ pub enum Register {
     SP, BP, SI, DI,
 }
 
+impl Register {
+    pub fn is_wide(&self) -> bool {
+        matches!(
+            self,
+            Self::AX | Self::BX | Self::CX | Self::DX | Self::SP | Self::BP | Self::SI | Self::DI
+        )
+    }
+}
+
 impl From<Register> for Operand {
     fn from(val: Register) -> Self {
         Operand::Register(val)

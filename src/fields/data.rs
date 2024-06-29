@@ -81,6 +81,38 @@ impl ops::Sub<Data> for Data {
     }
 }
 
+impl ops::BitAnd<Data> for Data {
+    type Output = Data;
+    fn bitand(self, rhs: Data) -> Self::Output {
+        match self {
+            Self::U8(x) => match rhs {
+                Self::U8(y) => Data::U8(x & y),
+                Self::U16(_) => unreachable!(),
+            },
+            Self::U16(x) => match rhs {
+                Self::U8(_) => unreachable!(),
+                Self::U16(y) => Data::U16(x & y),
+            },
+        }
+    }
+}
+
+impl ops::BitXor<Data> for Data {
+    type Output = Data;
+    fn bitxor(self, rhs: Data) -> Self::Output {
+        match self {
+            Self::U8(x) => match rhs {
+                Self::U8(y) => Data::U8(x ^ y),
+                Self::U16(_) => unreachable!(),
+            },
+            Self::U16(x) => match rhs {
+                Self::U8(_) => unreachable!(),
+                Self::U16(y) => Data::U16(x ^ y),
+            },
+        }
+    }
+}
+
 impl From<Data> for Operand {
     fn from(val: Data) -> Self {
         Operand::Immediate(val)

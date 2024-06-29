@@ -17,6 +17,10 @@ impl Memory {
         u16::from_le_bytes([low, high])
     }
 
+    pub fn load_8(&self, addr: u16) -> u8 {
+        *self.0.get(addr as usize).expect("addr in range")
+    }
+
     pub fn store_16(&mut self, addr: u16, val: u16) {
         let [low, high] = val.to_le_bytes();
         *self.0.get_mut(addr as usize).expect("addr in range") = low;

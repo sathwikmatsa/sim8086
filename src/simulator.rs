@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use crate::{
     conditional_advance,
-    cpu::{Clocks8086, Clocks8088, Flags, Memory, Registers},
+    cpu::{Clocks8086, Clocks8088, Flags, JmpNotTakenClocks, JmpTakenClocks, Memory, Registers},
     disasm::Program,
     fields::{EffectiveAddress, Inc, Operation},
     handlers::*,
@@ -39,9 +39,13 @@ impl Simulator {
 
     pub fn exec(&mut self, program: &mut Program) {
         while let Some(inst) = program.next_instruction() {
+            // STOP on RET
+            if inst.operation == Operation::Ret {
+                break;
+            }
             self.ip += inst.size as u16;
 
-            if self.estimate_cycles {
+            if self.estimate_cycles && !inst.is_conditional_advance() {
                 let (clocks86, clocks88) = inst.clocks(|ea: EffectiveAddress| -> bool {
                     self.registers.calculate_eff_addr(ea) % 2 != 0
                 });
@@ -73,27 +77,48 @@ impl Simulator {
                     &mut self.memory,
                 ),
                 Operation::JNE => {
-                    conditional_advance!(!self.flags.zero, "JNE", self, inst, program)
+                    conditional_advance!(!self.flags.zero, "JNE", self, inst, program);
                 }
                 Operation::JE => {
-                    conditional_advance!(self.flags.zero, "JE", self, inst, program)
+                    conditional_advance!(self.flags.zero, "JE", self, inst, program);
                 }
                 Operation::JB => {
-                    conditional_advance!(self.flags.carry, "JB", self, inst, program)
+                    conditional_advance!(self.flags.carry, "JB", self, inst, program);
                 }
                 Operation::JP => {
-                    conditional_advance!(self.flags.parity, "JP", self, inst, program)
+                    conditional_advance!(self.flags.parity, "JP", self, inst, program);
                 }
                 Operation::LOOPNZ => {
                     self.registers.dec_cx();
                     let cond = self.registers.cx() != 0 && !self.flags.zero;
-                    conditional_advance!(cond, "LOOPNZ", self, inst, program)
+                    conditional_advance!(cond, "LOOPNZ", self, inst, program);
                 }
                 Operation::LOOP => {
                     self.registers.dec_cx();
                     let cond = self.registers.cx() != 0;
-                    conditional_advance!(cond, "LOOP", self, inst, program)
+                    conditional_advance!(cond, "LOOP", self, inst, program);
                 }
+                Operation::TEST => handle_logical(
+                    LogicalOp::Test,
+                    inst,
+                    &mut self.registers,
+                    &mut self.flags,
+                    &mut self.memory,
+                ),
+                Operation::XOR => handle_logical(
+                    LogicalOp::Xor,
+                    inst,
+                    &mut self.registers,
+                    &mut self.flags,
+                    &mut self.memory,
+                ),
+                Operation::INC => handle_arithmetic(
+                    ArithmeticOp::Inc,
+                    inst,
+                    &mut self.registers,
+                    &mut self.flags,
+                    &mut self.memory,
+                ),
                 _ => unimplemented!("{:?}", inst),
             }
         }

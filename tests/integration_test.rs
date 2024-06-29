@@ -297,3 +297,20 @@ fn challenge_cycles() {
     assert_eq!(sim.clocks_8086(), 289);
     assert_eq!(sim.clocks_8088(), 341);
 }
+
+#[test]
+fn single_scalar() {
+    let mut sim = sim_test_fixture_with_clock_estimation("listing_0059_SingleScalar");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      ax: 0x00bf (191)
+      cx: 0x0008 (8)
+      bp: 0x03e8 (1000)
+      si: 0x0008 (8)
+      di: 0x0008 (8)
+      ip: 0x0037 (55)
+   flags: PZ"#;
+    assert_eq!(output.trim(), expected);
+    assert_eq!(sim.clocks_8086(), 463);
+}

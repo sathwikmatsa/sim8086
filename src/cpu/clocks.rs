@@ -41,6 +41,7 @@ impl Instruction {
 
         (Clocks8086(c86), Clocks8088(c88))
     }
+
     pub fn clocks<F>(&self, is_ea_odd: F) -> (Clocks8086, Clocks8088)
     where
         F: Fn(EffectiveAddress) -> bool,
@@ -52,10 +53,12 @@ impl Instruction {
                 match (first, second) {
                     (Operand::Register(_), Operand::Register(_)) => (Clocks8086(3), Clocks8088(3)),
                     (Operand::Register(_), Operand::EffectiveAddress(ea)) => {
-                        if ea.wide() == Wide::Byte {
-                            unimplemented!()
+                        let base = 9 + ea.clocks();
+                        match ea.wide() {
+                            Wide::Word => self.get_clocks_for_wide(base, 1, is_ea_odd(ea)),
+                            Wide::Byte => (Clocks8086(base), Clocks8088(base)),
+                            _ => unreachable!(),
                         }
-                        self.get_clocks_for_wide(9 + ea.clocks(), 1, is_ea_odd(ea))
                     }
                     (Operand::EffectiveAddress(ea), Operand::Register(_)) => {
                         if ea.wide() == Wide::Byte {
@@ -96,6 +99,10 @@ impl Instruction {
                     (Operand::EffectiveAddress(ea), Operand::Immediate(Data::U16(_))) => {
                         self.get_clocks_for_wide(10 + ea.clocks(), 1, is_ea_odd(ea))
                     }
+                    (Operand::EffectiveAddress(ea), Operand::Immediate(Data::U8(_))) => {
+                        let clocks = 10 + ea.clocks();
+                        (Clocks8086(clocks), Clocks8088(clocks))
+                    }
                     (Operand::SR(_), Operand::Register(_)) => (Clocks8086(2), Clocks8088(2)),
                     (Operand::SR(_), Operand::EffectiveAddress(ea)) => {
                         self.get_clocks_for_wide(8 + ea.clocks(), 1, is_ea_odd(ea))
@@ -107,6 +114,41 @@ impl Instruction {
                     _ => unimplemented!("{:?}", self),
                 }
             }
+            Operation::TEST => {
+                let first = self.first.expect("first operand exist for Test op");
+                let second = self.second.expect("second operand exist for Test op");
+                match (first, second) {
+                    (Operand::Register(_), Operand::Register(_)) => (Clocks8086(3), Clocks8088(3)),
+                    _ => unimplemented!("{:?}", self),
+                }
+            }
+            Operation::XOR => {
+                let first = self.first.expect("first operand exist for Xor op");
+                let second = self.second.expect("second operand exist for Xor op");
+                match (first, second) {
+                    (Operand::Register(_), Operand::Register(_)) => (Clocks8086(3), Clocks8088(3)),
+                    _ => unimplemented!("{:?}", self),
+                }
+            }
+            Operation::INC => {
+                let first = self.first.expect("first operand exist for Inc op");
+                match first {
+                    Operand::Register(reg) => {
+                        let clocks = if reg.is_wide() { 2 } else { 3 };
+                        (Clocks8086(clocks), Clocks8088(clocks))
+                    }
+                    _ => unimplemented!("{:?}", self),
+                }
+            }
+            Operation::Cmp => {
+                let first = self.first.expect("first operand exist for Cmp op");
+                let second = self.second.expect("second operand exist for Cmp op");
+                match (first, second) {
+                    (Operand::Register(_), Operand::Register(_)) => (Clocks8086(3), Clocks8088(3)),
+                    _ => unimplemented!("{:?}", self),
+                }
+            }
+            Operation::Ret => (Clocks8086(8), Clocks8088(8)),
             _ => unimplemented!("{:?}", self),
         }
     }
