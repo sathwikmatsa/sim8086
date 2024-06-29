@@ -331,3 +331,20 @@ fn unroll2_scalar() {
     assert_eq!(output.trim(), expected);
     assert_eq!(sim.clocks_8086(), 403);
 }
+
+#[test]
+fn dual_scalar() {
+    let mut sim = sim_test_fixture_with_clock_estimation("listing_0061_DualScalar");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      ax: 0x00bf (191)
+      bx: 0x005d (93)
+      cx: 0x0008 (8)
+      bp: 0x03e8 (1000)
+      di: 0x0008 (8)
+      ip: 0x0040 (64)
+   flags: OS"#;
+    assert_eq!(output.trim(), expected);
+    assert_eq!(sim.clocks_8086(), 401);
+}
