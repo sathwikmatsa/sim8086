@@ -348,3 +348,21 @@ fn dual_scalar() {
     assert_eq!(output.trim(), expected);
     assert_eq!(sim.clocks_8086(), 401);
 }
+
+#[test]
+fn quad_scalar() {
+    let mut sim = sim_test_fixture_with_clock_estimation("listing_0062_QuadScalar");
+    sim.enable_ip_log();
+    let output = sim.to_string();
+    let expected = r#"Final registers:
+      ax: 0x00bf (191)
+      bx: 0x613a (24890)
+      cx: 0x0008 (8)
+      dx: 0x0023 (35)
+      bp: 0x03e8 (1000)
+      di: 0x0008 (8)
+      ip: 0x004c (76)
+   flags: OS"#;
+    assert_eq!(output.trim(), expected);
+    assert_eq!(sim.clocks_8086(), 372);
+}
